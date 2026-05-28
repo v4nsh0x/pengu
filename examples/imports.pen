@@ -1,0 +1,36 @@
+// Pengu Example: Using imports
+
+use math
+
+store nums = [1, 2, 3, 4, 5]
+
+say "square(7) = " + toString(square(7))
+say "cube(3) = " + toString(cube(3))
+say "max(10, 20) = " + toString(max(10, 20))
+say "min(10, 20) = " + toString(min(10, 20))
+say "sum([1..5]) = " + toString(sum(nums))
+
+// A more complex example: map-like behavior
+fn double(x) {
+    return x * 2
+}
+
+store results = []
+repeat n in nums {
+    results = append(results, double(n))
+}
+say "Doubled: " + toString(results)
+
+// Closures
+fn makeCounter() {
+    store count = 0
+    return fn() {
+        count = count + 1
+        return count
+    }
+}
+
+store counter = makeCounter()
+say "Counter: " + toString(counter())
+say "Counter: " + toString(counter())
+say "Counter: " + toString(counter())

@@ -1,0 +1,6 @@
+say "hello world"
+when 1 == 1 {
+    say "hello world"
+} otherwise {
+    say "hello world"
+}

@@ -1,0 +1,17 @@
+// Pengu Spec Example — the exact program from the language spec
+
+use math
+
+store nums = [1, 2, 3]
+
+fn double(x) {
+    return x * 2
+}
+
+repeat n in nums {
+    when n > 1 {
+        say double(n)
+    } otherwise {
+        say "small"
+    }
+}

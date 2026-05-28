@@ -1,0 +1,22 @@
+// Pengu Example: FizzBuzz
+
+fn fizzbuzz(n) {
+    repeat i in range(1, n + 1) {
+        when i % 15 == 0 {
+            say "FizzBuzz"
+        } otherwise {
+            when i % 3 == 0 {
+                say "Fizz"
+            } otherwise {
+                when i % 5 == 0 {
+                    say "Buzz"
+                } otherwise {
+                    say i
+                }
+            }
+        }
+    }
+}
+
+say "--- FizzBuzz 1 to 20 ---"
+fizzbuzz(20)
