@@ -16,7 +16,7 @@ import (
 	"github.com/v4nsh0x/pengu/parser"
 )
 
-const version = "0.1.1"
+const version = "0.1.2"
 
 const logo = `
   🐧 Pengu v%s
@@ -295,13 +295,20 @@ func handleInstall(module string) {
 		os.Exit(1)
 	}
 
-	err = os.MkdirAll("modules", 0755)
+	execPath, err := os.Executable()
+	if err != nil {
+		fmt.Printf("Error resolving executable path: %v\n", err)
+		os.Exit(1)
+	}
+	modulesDir := filepath.Join(filepath.Dir(execPath), "modules")
+
+	err = os.MkdirAll(modulesDir, 0755)
 	if err != nil {
 		fmt.Printf("Error creating modules directory: %v\n", err)
 		os.Exit(1)
 	}
 
-	outPath := filepath.Join("modules", module)
+	outPath := filepath.Join(modulesDir, module)
 	out, err := os.Create(outPath)
 	if err != nil {
 		fmt.Printf("Error creating file: %v\n", err)
