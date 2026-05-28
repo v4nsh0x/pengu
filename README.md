@@ -18,13 +18,13 @@ greet(name)
 
 ## Why I Built This
 
-I started building Pengu because I wanted to understand how programming languages actually work internally instead of just using them.
+I started building Pengu because I wanted to understand how programming languages actually work internally instead of just using them. 
 
 Most people write code every day without thinking about what happens between typing code and seeing it run. I wanted to learn that process from the ground up, so I built everything myself — the lexer, parser, AST, interpreter, runtime, and CLI.
 
-Working on Pengu taught me how source code gets tokenized, parsed into a syntax tree, evaluated, and executed step by step. Features like variables, functions, closures, loops, and imports all had to be implemented manually in Go without relying on external libraries.
+But beyond just learning, I built it to solve a personal frustration. I seriously love Golang so much — it's fast, compiled, and powerful. However, it often feels too complex and verbose for simple scripting tasks or automation. I found myself needing something with the simple, clean syntax of Python, but backed by the execution speed and single-binary deployment of Go.
 
-The codebase is kept simple and readable on purpose so it’s easy to explore and learn from, especially for people interested in interpreters, compilers, or systems programming.
+Pengu is the result: a language that is incredibly easy to write, but runs at near-native speeds under the hood. The codebase is kept simple and readable on purpose so it's easy to explore and learn from, especially for people interested in interpreters, compilers, or systems programming.
 
 ---
 
