@@ -73,4 +73,20 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
     });
+
+    // Install tab switching
+    const installTabs = document.querySelectorAll('.install-tab');
+    const installPanels = document.querySelectorAll('.install-panel');
+
+    installTabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const target = tab.getAttribute('data-tab');
+
+            installTabs.forEach(t => t.classList.remove('active'));
+            installPanels.forEach(p => p.classList.remove('active'));
+
+            tab.classList.add('active');
+            document.getElementById(`panel-${target}`).classList.add('active');
+        });
+    });
 });
