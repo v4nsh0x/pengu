@@ -16,8 +16,29 @@ greet(name)
 
 ---
 
+## Why I Built This
+
+I built Pengu to deeply understand how programming languages actually work under the hood — from raw source code all the way down to execution.
+
+Most developers use languages every day without ever understanding what happens between writing code and seeing output. I wanted to break open that black box. Building Pengu from scratch meant implementing every layer myself:
+
+- **Lexer** — how source code gets broken into tokens
+- **Parser** — how tokens form a syntax tree with operator precedence
+- **AST** — how code is represented as a data structure
+- **Interpreter** — how a tree-walking evaluator executes code
+- **Runtime** — how scoping, closures, and memory work
+- **CLI** — how tooling ties everything together
+
+This project was about going low-level to understand how systems interpret and execute code at a fundamental level. Every language feature — variables, functions, closures, loops, imports — had to be built from first principles in Go. No libraries, no shortcuts.
+
+If you're interested in compilers, interpreters, or systems programming, Pengu's codebase is intentionally clean and readable — designed to be studied, not just used.
+
+---
+
 ## Table of Contents
 
+- [Why I Built This](#why-i-built-this)
+- [Vision & Future](#vision--future)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [CLI Usage](#cli-usage)
@@ -40,6 +61,7 @@ greet(name)
 - [Error Handling](#error-handling)
 - [Architecture](#architecture)
 - [Examples](#examples)
+- [Vision & Future](#vision--future-1)
 
 ---
 
@@ -1105,10 +1127,43 @@ repeat true {
 
 ---
 
+## Vision & Future
+
+Pengu started as a learning project, but I see real potential in where it can go — especially in **cybersecurity**.
+
+The security space is dominated by Python scripts that are slow to start, heavy on dependencies, and painful to distribute. Pengu is designed to be the opposite: **fast startup, zero dependencies, single-binary distribution, and clean syntax**. That makes it a natural fit for security tooling.
+
+### Where Pengu is heading:
+
+**🔒 Cybersecurity & Offensive Tooling**
+- **Recon automation** — write fast, readable scripts for network scanning and enumeration
+- **Exploit development** — prototype payloads and PoCs with a lightweight scripting language
+- **CTF tools** — quick scripts for capture-the-flag challenges without Python overhead
+- **Payload generation** — compile Pengu scripts into standalone binaries with `pengu build -o` for easy deployment
+- **Red team scripting** — lightweight, portable scripts that compile to native executables with no runtime needed on target
+
+**⚡ Language Improvements**
+- Bytecode VM for faster execution
+- Native networking and HTTP modules
+- File I/O and system command modules
+- Binary/hex data manipulation built-ins
+- Package manager for community modules
+- Cross-compilation support
+
+**🛠️ Tooling**
+- Syntax highlighting for VS Code, Vim, and other editors
+- Language server protocol (LSP) support
+- Debugger
+- Formatter and linter
+
+The goal is to make Pengu the go-to scripting language for hackers and security researchers who want something **faster than Python, simpler than Go, and more portable than both**.
+
+---
+
 ## License
 
 MIT
 
 ---
 
-*Built with ❤️ and Go. Happy coding! 🐧*
+*Built with ❤️ and Go by [v4nsh0x](https://github.com/v4nsh0x). Happy hacking! 🐧*
