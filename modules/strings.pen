@@ -1,0 +1,60 @@
+// Pengu Standard Module: strings
+// Provides common string utility functions
+
+fn repeat_str(s, n) {
+    store result = ""
+    repeat n {
+        result = result + s
+    }
+    return result
+}
+
+fn starts_with(s, prefix) {
+    when len(prefix) > len(s) {
+        return false
+    }
+    repeat i in range(len(prefix)) {
+        when s[i] != prefix[i] {
+            return false
+        }
+    }
+    return true
+}
+
+fn ends_with(s, suffix) {
+    when len(suffix) > len(s) {
+        return false
+    }
+    store offset = len(s) - len(suffix)
+    repeat i in range(len(suffix)) {
+        when s[offset + i] != suffix[i] {
+            return false
+        }
+    }
+    return true
+}
+
+fn join(arr, sep) {
+    store result = ""
+    repeat i in range(len(arr)) {
+        when i > 0 {
+            result = result + sep
+        }
+        result = result + toString(arr[i])
+    }
+    return result
+}
+
+fn reverse_str(s) {
+    store result = ""
+    store i = len(s) - 1
+    repeat i >= 0 {
+        result = result + s[i]
+        i = i - 1
+    }
+    return result
+}
+
+fn char_at(s, index) {
+    return s[index]
+}
