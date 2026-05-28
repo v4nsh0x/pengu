@@ -30,6 +30,7 @@ Usage:
   pengu repl                Start interactive REPL
   pengu build <file> -o <out>  Compile to executable
   pengu install <module>    Download and install a module
+  pengu update              Update Pengu to the latest version
   pengu version             Show version
   pengu help                Show this help
 `
@@ -71,6 +72,9 @@ func Run(args []string) {
 			os.Exit(1)
 		}
 		handleInstall(args[2])
+
+	case "update":
+		handleUpdate()
 
 	default:
 		// If the argument ends with .pen, treat it as a file to run
