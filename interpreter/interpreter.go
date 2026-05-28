@@ -343,6 +343,15 @@ func (i *Interpreter) execSay(n *ast.SayStatement, env *runtime.Environment) (*r
 }
 
 func (i *Interpreter) execUse(n *ast.UseStatement, env *runtime.Environment) (*runtime.Value, error) {
+	// Check for built-in native modules
+	if n.Module == "http" {
+		if !i.imported["__builtin_http"] {
+			i.imported["__builtin_http"] = true
+			env.Set("http", createHttpModule())
+		}
+		return nil, nil
+	}
+
 	moduleName := n.Module + ".pen"
 
 	// Search paths in order:

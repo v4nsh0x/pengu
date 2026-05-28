@@ -668,15 +668,18 @@ func (p *Parser) parsePostfix() (ast.Node, error) {
 			// Function call
 			p.advance() // consume '('
 			args := make([]ast.Node, 0)
+			p.skipNewlines()
 			for p.peekType() != lexer.TOKEN_RPAREN && !p.isAtEnd() {
 				arg, err := p.parseExpression()
 				if err != nil {
 					return nil, err
 				}
 				args = append(args, arg)
+				p.skipNewlines()
 				if p.peekType() == lexer.TOKEN_COMMA {
 					p.advance()
 				}
+				p.skipNewlines()
 			}
 			_, err := p.expect(lexer.TOKEN_RPAREN)
 			if err != nil {
