@@ -3,6 +3,8 @@ package cli
 import (
 	"bufio"
 	"fmt"
+	"io"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -27,6 +29,7 @@ Usage:
   pengu run <file.pen>      Run a Pengu script
   pengu repl                Start interactive REPL
   pengu build <file> -o <out>  Compile to executable
+  pengu install <module>    Download and install a module
   pengu version             Show version
   pengu help                Show this help
 `
@@ -60,6 +63,14 @@ func Run(args []string) {
 
 	case "build":
 		handleBuild(args[2:])
+
+	case "install":
+		if len(args) < 3 {
+			fmt.Println("Error: missing module argument")
+			fmt.Println("Usage: pengu install <module_name>")
+			os.Exit(1)
+		}
+		handleInstall(args[2])
 
 	default:
 		// If the argument ends with .pen, treat it as a file to run
@@ -264,4 +275,48 @@ func execExtension() string {
 		return ".exe"
 	}
 	return ""
+}
+
+// handleInstall downloads a module from the official repo and saves it to the local modules directory.
+func handleInstall(module string) {
+	if !strings.HasSuffix(module, ".pen") {
+		module += ".pen"
+	}
+
+	url := fmt.Sprintf("https://raw.githubusercontent.com/v4nsh0x/pengu/main/modules/%s", module)
+
+	fmt.Printf("Downloading %s...\n", module)
+	resp, err := http.Get(url)
+	if err != nil {
+		fmt.Printf("Error downloading module: %v\n", err)
+		os.Exit(1)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 {
+		fmt.Printf("Error: Module '%s' not found (status %d)\n", module, resp.StatusCode)
+		os.Exit(1)
+	}
+
+	err = os.MkdirAll("modules", 0755)
+	if err != nil {
+		fmt.Printf("Error creating modules directory: %v\n", err)
+		os.Exit(1)
+	}
+
+	outPath := filepath.Join("modules", module)
+	out, err := os.Create(outPath)
+	if err != nil {
+		fmt.Printf("Error creating file: %v\n", err)
+		os.Exit(1)
+	}
+	defer out.Close()
+
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		fmt.Printf("Error writing file: %v\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("Successfully installed %s to %s\n", module, outPath)
 }

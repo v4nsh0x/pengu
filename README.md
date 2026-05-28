@@ -142,6 +142,21 @@ The generated binary:
 - Bundles the Pengu runtime
 - Automatically gets `.exe` on Windows, no extension on Linux/macOS
 
+### Package Manager
+
+Pengu includes a built-in package manager to easily pull standard modules from the official repository.
+
+```bash
+pengu install <module_name>
+```
+
+Example:
+```bash
+pengu install math
+pengu install array
+```
+This downloads the module and places it in your local `modules/` directory, making it instantly available via the `use` keyword.
+
 ### Version & Help
 
 ```bash
