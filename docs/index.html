@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pengu Programming Language</title>
+    <meta name="description" content="A fun, fast, and friendly programming language built in Go.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    <!-- Prism for syntax highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-content">
+            <div class="logo">
+                <span class="penguin-icon">🐧</span>
+                <span class="logo-text">Pengu</span>
+            </div>
+            <div class="nav-links">
+                <a href="#home" class="nav-link">Home</a>
+                <a href="#docs" class="nav-link">Documentation</a>
+                <a href="https://github.com/v4nsh0x/pengu" target="_blank" class="nav-link github-btn">
+                    <svg height="24" viewBox="0 0 16 16" width="24"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path></svg>
+                    GitHub
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header id="home" class="hero">
+        <div class="hero-bg">
+            <div class="glow glow-1"></div>
+            <div class="glow glow-2"></div>
+        </div>
+        <div class="hero-content">
+            <div class="badge">v0.1.0 Released</div>
+            <h1 class="title">Code at the speed of <span class="gradient-text">thought</span>.</h1>
+            <p class="subtitle">A fun, fast, and friendly programming language built in Go. Designed for scripting, automation, and cybersecurity tooling.</p>
+            
+            <div class="hero-actions">
+                <a href="#installation" class="btn btn-primary">Get Started</a>
+                <a href="#quick-start" class="btn btn-secondary">Read Docs</a>
+            </div>
+
+            <div class="code-window window-reveal">
+                <div class="window-header">
+                    <div class="dots">
+                        <span class="dot red"></span>
+                        <span class="dot yellow"></span>
+                        <span class="dot green"></span>
+                    </div>
+                    <div class="window-title">hello.pen</div>
+                </div>
+                <div class="window-body">
+<pre><code class="language-javascript">// It's just that simple.
+fn greet(name) {
+    say "Hello, " + name + "! 🐧"
+}
+
+greet("Pengu")
+
+// Built-in high performance arrays
+store nums = [1, 2, 3, 4, 5]
+say nums.map(fn(x) { return x * 2 })</code></pre>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Docs Section -->
+    <main id="docs" class="docs-layout">
+        <aside class="sidebar">
+            <div class="sidebar-inner">
+                <h3>Getting Started</h3>
+                <ul>
+                    <li><a href="#installation">Installation</a></li>
+                    <li><a href="#quick-start">Quick Start</a></li>
+                    <li><a href="#cli-usage">CLI Usage</a></li>
+                </ul>
+
+                <h3>Language Guide</h3>
+                <ul>
+                    <li><a href="#variables">Variables</a></li>
+                    <li><a href="#types">Data Types</a></li>
+                    <li><a href="#functions">Functions</a></li>
+                    <li><a href="#control-flow">Control Flow</a></li>
+                </ul>
+
+                <h3>Standard Library</h3>
+                <ul>
+                    <li><a href="#arrays">Array Methods</a></li>
+                    <li><a href="#strings">String Methods</a></li>
+                    <li><a href="#http">HTTP Module</a></li>
+                </ul>
+            </div>
+        </aside>
+
+        <article class="docs-content">
+            <!-- Installation -->
+            <section id="installation">
+                <h2>Installation</h2>
+                <p>Pengu is compiled natively via Go. To get started, clone the repository and build the binary.</p>
+                
+                <div class="code-block">
+<pre><code class="language-bash">git clone https://github.com/v4nsh0x/pengu.git
+cd pengu
+go build -o pengu .</code></pre>
+                </div>
+                <p>Add the binary to your system PATH to run `pengu` from anywhere.</p>
+            </section>
+
+            <!-- Quick Start -->
+            <section id="quick-start">
+                <h2>Quick Start</h2>
+                <p>Create a file called <code>hello.pen</code> and write your first Pengu program:</p>
+                <div class="code-block">
+<pre><code class="language-javascript">say "Hello, Pengu! 🐧"</code></pre>
+                </div>
+                <p>Run it using the CLI:</p>
+                <div class="code-block">
+<pre><code class="language-bash">pengu hello.pen</code></pre>
+                </div>
+            </section>
+
+            <!-- CLI Usage -->
+            <section id="cli-usage">
+                <h2>CLI Usage</h2>
+                <p>Pengu provides a robust command-line interface for running and compiling your scripts.</p>
+                
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="icon">🚀</div>
+                        <h4>Run Scripts</h4>
+                        <code>pengu run &lt;file.pen&gt;</code>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">💻</div>
+                        <h4>Interactive REPL</h4>
+                        <code>pengu repl</code>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">📦</div>
+                        <h4>Compile to Binary</h4>
+                        <code>pengu build &lt;file&gt; -o &lt;out&gt;</code>
+                    </div>
+                    <div class="feature-card">
+                        <div class="icon">🌐</div>
+                        <h4>Package Manager</h4>
+                        <code>pengu install &lt;module&gt;</code>
+                    </div>
+                </div>
+            </section>
+
+            <hr class="divider">
+
+            <!-- Variables -->
+            <section id="variables">
+                <h2>Variables</h2>
+                <p>Declare variables using the <code>store</code> keyword. Pengu is dynamically typed, so you don't need to specify types.</p>
+                <div class="code-block">
+<pre><code class="language-javascript">store name = "Vansh"
+store age = 20
+store isHacker = true
+
+// Reassign values directly
+age = 21</code></pre>
+                </div>
+            </section>
+
+            <!-- Functions -->
+            <section id="functions">
+                <h2>Functions & Closures</h2>
+                <p>Define functions using the <code>fn</code> keyword. Pengu supports first-class functions and closures!</p>
+                <div class="code-block">
+<pre><code class="language-javascript">fn add(x, y) {
+    return x + y
+}
+
+say add(10, 5) // 15
+
+// Functions as values
+store multiply = fn(a, b) {
+    return a * b
+}
+say multiply(4, 5) // 20</code></pre>
+                </div>
+            </section>
+
+            <!-- Control Flow -->
+            <section id="control-flow">
+                <h2>Control Flow</h2>
+                <p>Use <code>when / otherwise</code> for conditionals and <code>repeat</code> for loops.</p>
+                
+                <h3>Conditionals</h3>
+                <div class="code-block">
+<pre><code class="language-javascript">store score = 85
+
+when score >= 90 {
+    say "A"
+} otherwise {
+    when score >= 80 {
+        say "B"
+    } otherwise {
+        say "C"
+    }
+}</code></pre>
+                </div>
+
+                <h3>Loops</h3>
+                <div class="code-block">
+<pre><code class="language-javascript">// While loop
+store i = 0
+repeat i < 5 {
+    say i
+    i = i + 1
+}
+
+// Iterator loop
+store nums = [1, 2, 3]
+repeat n in nums {
+    say n
+}</code></pre>
+                </div>
+            </section>
+
+            <hr class="divider">
+
+            <!-- Arrays -->
+            <section id="arrays">
+                <h2>Array Methods</h2>
+                <p>Pengu provides blazing fast, natively built-in array methods for transforming data instantly.</p>
+                
+                <div class="table-responsive">
+                    <table class="docs-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>.push(item)</code></td>
+                                <td>Adds an item to the end of the array</td>
+                                <td>New length</td>
+                            </tr>
+                            <tr>
+                                <td><code>.pop()</code></td>
+                                <td>Removes the last item</td>
+                                <td>Removed item</td>
+                            </tr>
+                            <tr>
+                                <td><code>.map(fn)</code></td>
+                                <td>Transforms each element</td>
+                                <td>New array</td>
+                            </tr>
+                            <tr>
+                                <td><code>.filter(fn)</code></td>
+                                <td>Keeps elements matching the condition</td>
+                                <td>New array</td>
+                            </tr>
+                            <tr>
+                                <td><code>.reduce(fn, init)</code></td>
+                                <td>Accumulates values</td>
+                                <td>Final value</td>
+                            </tr>
+                            <tr>
+                                <td><code>.find(fn)</code></td>
+                                <td>Finds first matching element</td>
+                                <td>Item or null</td>
+                            </tr>
+                            <tr>
+                                <td><code>.includes(val)</code></td>
+                                <td>Checks if array contains value</td>
+                                <td>Boolean</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="code-block">
+<pre><code class="language-javascript">store nums = [1, 2, 3, 4, 5]
+
+store evens = nums.filter(fn(x) { return x % 2 == 0 })
+say evens // [2, 4]
+
+store doubled = evens.map(fn(x) { return x * 2 })
+say doubled // [4, 8]</code></pre>
+                </div>
+            </section>
+
+            <!-- HTTP -->
+            <section id="http">
+                <h2>HTTP Module</h2>
+                <div class="badge-module">Native Built-in</div>
+                <p>Pengu is built for modern networking and cybersecurity tooling. The native <code>http</code> module lets you make blazing fast REST API calls.</p>
+                
+                <p>Import it anywhere using <code>use http</code>.</p>
+
+                <div class="code-block">
+<pre><code class="language-javascript">use http
+
+// Basic GET request
+store res = http.get("https://jsonplaceholder.typicode.com/todos/1")
+say res.status
+
+// Automatically parse JSON
+store data = res.json()
+say "Title: " + data["title"]
+
+// POST request with body and headers
+store postRes = http.post(
+    "https://api.example.com/data",
+    { name: "Pengu", secure: true },
+    {
+        headers: { "Authorization": "Bearer token123" },
+        timeout: 5
+    }
+)</code></pre>
+                </div>
+
+                <p>The response object exposes <code>status</code>, <code>text</code>, <code>body</code>, <code>headers</code>, and the <code>json()</code> method.</p>
+            </section>
+
+        </article>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <span class="penguin-icon">🐧</span> Pengu
+            </div>
+            <p>Built with ❤️ in Go by <a href="https://github.com/v4nsh0x" target="_blank">v4nsh0x</a>.</p>
+            <p class="copyright">&copy; 2026 Vansh. MIT License.</p>
+        </div>
+    </footer>
+
+    <!-- Prism JS for syntax highlighting -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-bash.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>
