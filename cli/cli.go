@@ -1,0 +1,267 @@
+package cli
+
+import (
+	"bufio"
+	"fmt"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+
+	"github.com/vansh/pengu/interpreter"
+	"github.com/vansh/pengu/lexer"
+	"github.com/vansh/pengu/parser"
+)
+
+const version = "0.1.0"
+
+const logo = `
+  🐧 Pengu v%s
+  A fun, fast, and friendly programming language
+`
+
+const usage = `
+Usage:
+  pengu <file.pen>          Run a Pengu script
+  pengu run <file.pen>      Run a Pengu script
+  pengu repl                Start interactive REPL
+  pengu build <file> -o <out>  Compile to executable
+  pengu version             Show version
+  pengu help                Show this help
+`
+
+// Run is the main entry point for the Pengu CLI.
+func Run(args []string) {
+	if len(args) < 2 {
+		printHelp()
+		return
+	}
+
+	command := args[1]
+
+	switch command {
+	case "version", "--version", "-v":
+		fmt.Printf(logo, version)
+
+	case "help", "--help", "-h":
+		printHelp()
+
+	case "repl":
+		runREPL()
+
+	case "run":
+		if len(args) < 3 {
+			fmt.Println("Error: missing file argument")
+			fmt.Println("Usage: pengu run <file.pen>")
+			os.Exit(1)
+		}
+		runFile(args[2])
+
+	case "build":
+		handleBuild(args[2:])
+
+	default:
+		// If the argument ends with .pen, treat it as a file to run
+		if strings.HasSuffix(command, ".pen") {
+			// Check for -o flag (pengu file.pen -o output)
+			if len(args) >= 4 && args[2] == "-o" {
+				handleBuild([]string{command, "-o", args[3]})
+			} else {
+				runFile(command)
+			}
+		} else {
+			fmt.Printf("Unknown command: %s\n", command)
+			printHelp()
+			os.Exit(1)
+		}
+	}
+}
+
+func printHelp() {
+	fmt.Printf(logo, version)
+	fmt.Println(usage)
+}
+
+func runFile(filename string) {
+	interp := interpreter.New()
+	err := interp.RunFile(filename)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+
+func runREPL() {
+	fmt.Printf(logo, version)
+	fmt.Println("  Type 'exit' or press Ctrl+C to quit\n")
+
+	interp := interpreter.New()
+	scanner := bufio.NewScanner(os.Stdin)
+
+	for {
+		fmt.Print("🐧 > ")
+		if !scanner.Scan() {
+			break
+		}
+		line := strings.TrimSpace(scanner.Text())
+		if line == "" {
+			continue
+		}
+		if line == "exit" || line == "quit" {
+			fmt.Println("Bye! 🐧")
+			break
+		}
+
+		err := interp.Run(line)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+		}
+	}
+}
+
+func handleBuild(args []string) {
+	if len(args) < 1 {
+		fmt.Println("Error: missing file argument")
+		fmt.Println("Usage: pengu build <file.pen> -o <output>")
+		os.Exit(1)
+	}
+
+	inputFile := args[0]
+	outputName := strings.TrimSuffix(filepath.Base(inputFile), ".pen")
+
+	for i := 0; i < len(args); i++ {
+		if args[i] == "-o" && i+1 < len(args) {
+			outputName = args[i+1]
+		}
+	}
+
+	// Auto-add platform-appropriate extension if none provided
+	if !strings.Contains(filepath.Base(outputName), ".") {
+		outputName += execExtension()
+	}
+
+	// Read the source file
+	source, err := os.ReadFile(inputFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error: could not read file '%s'\n", inputFile)
+		os.Exit(1)
+	}
+
+	// Verify it parses correctly (parse-only, no execution)
+	l := lexer.New(string(source))
+	tokens, err := l.Tokenize()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Build failed — source has errors:")
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+	p := parser.New(tokens)
+	_, err = p.Parse()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "Build failed — source has errors:")
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+
+	// Generate a Go wrapper that embeds the source
+	err = generateBinary(string(source), outputName)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Build Error:\n%s\n", err)
+		os.Exit(1)
+	}
+
+	fmt.Printf("✅ Built: %s\n", outputName)
+}
+
+func generateBinary(source, outputName string) error {
+	// Create a temp directory for the build
+	tmpDir, err := os.MkdirTemp("", "pengu-build-*")
+	if err != nil {
+		return fmt.Errorf("could not create temp directory: %s", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	// We embed the source into a simple Go program that uses the Pengu interpreter
+	escapedSource := strings.ReplaceAll(source, "\\", "\\\\")
+	escapedSource = strings.ReplaceAll(escapedSource, "`", "` + \"`\" + `")
+
+	goSource := fmt.Sprintf(`package main
+
+import (
+	"fmt"
+	"os"
+
+	"github.com/vansh/pengu/interpreter"
+)
+
+func main() {
+	source := `+"`"+`%s`+"`"+`
+	interp := interpreter.New()
+	err := interp.Run(source)
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+		os.Exit(1)
+	}
+}
+`, escapedSource)
+
+	// Write the Go source
+	mainFile := filepath.Join(tmpDir, "main.go")
+	err = os.WriteFile(mainFile, []byte(goSource), 0644)
+	if err != nil {
+		return fmt.Errorf("could not write build file: %s", err)
+	}
+
+	// Initialize go.mod in temp dir
+	cwd, _ := os.Getwd()
+	penguModPath, _ := filepath.Abs(cwd)
+
+	// Detect Go version dynamically
+	goVer := runtime.Version() // e.g. "go1.25.5"
+	goVer = strings.TrimPrefix(goVer, "go")
+
+	goMod := fmt.Sprintf(`module pengu-build
+
+go %s
+
+require github.com/vansh/pengu v0.0.0
+
+replace github.com/vansh/pengu => %s
+`, goVer, penguModPath)
+
+	err = os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644)
+	if err != nil {
+		return fmt.Errorf("could not write go.mod: %s", err)
+	}
+
+	// Run go mod tidy to resolve dependencies
+	tidyCmd := exec.Command("go", "mod", "tidy")
+	tidyCmd.Dir = tmpDir
+	tidyCmd.Stderr = os.Stderr
+	if err := tidyCmd.Run(); err != nil {
+		return fmt.Errorf("go mod tidy failed: %s", err)
+	}
+
+	// Build the binary
+	absOutput, _ := filepath.Abs(outputName)
+	cmd := exec.Command("go", "build", "-o", absOutput, ".")
+	cmd.Dir = tmpDir
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+
+	return cmd.Run()
+}
+
+// execExtension returns the correct executable file extension for the target OS.
+// It checks the GOOS env var first (for cross-compilation), then falls back to runtime.GOOS.
+func execExtension() string {
+	targetOS := os.Getenv("GOOS")
+	if targetOS == "" {
+		targetOS = runtime.GOOS
+	}
+	if targetOS == "windows" {
+		return ".exe"
+	}
+	return ""
+}
