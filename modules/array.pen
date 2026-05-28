@@ -2,71 +2,31 @@
 // Provides common array utility functions
 
 fn map(arr, f) {
-    store result = []
-    repeat item in arr {
-        result = append(result, f(item))
-    }
-    return result
+    return arr.map(f)
 }
 
 fn filter(arr, f) {
-    store result = []
-    repeat item in arr {
-        when f(item) {
-            result = append(result, item)
-        }
-    }
-    return result
+    return arr.filter(f)
 }
 
 fn reduce(arr, f, initial) {
-    store acc = initial
-    repeat item in arr {
-        acc = f(acc, item)
-    }
-    return acc
+    return arr.reduce(f, initial)
 }
 
 fn find(arr, f) {
-    repeat item in arr {
-        when f(item) {
-            return item
-        }
-    }
-    return null
+    return arr.find(f)
 }
 
 fn includes(arr, value) {
-    repeat item in arr {
-        when item == value {
-            return true
-        }
-    }
-    return false
+    return arr.includes(value)
 }
 
 fn reverse(arr) {
-    store result = []
-    store i = len(arr) - 1
-    repeat i >= 0 {
-        result = append(result, arr[i])
-        i = i - 1
-    }
-    return result
+    return arr.reverse()
 }
 
 fn flat(arr) {
-    store result = []
-    repeat item in arr {
-        when type(item) == "array" {
-            repeat sub in item {
-                result = append(result, sub)
-            }
-        } otherwise {
-            result = append(result, item)
-        }
-    }
-    return result
+    return arr.flat()
 }
 
 fn zip(a, b) {
