@@ -65,7 +65,7 @@ The codebase is kept simple and readable on purpose so it’s easy to explore an
 Requires [Go 1.21+](https://go.dev/dl/).
 
 ```bash
-git clone https://github.com/vansh/pengu.git
+git clone https://github.com/v4nsh0x/pengu.git
 cd pengu
 go build -o pengu .
 ```
@@ -585,6 +585,35 @@ say nums  // [1, 2, 3, 4, 5, 6]
 store last = nums.pop()
 say last  // 6
 
+// Map — transform elements using a callback function
+store doubled = nums.map(fn(x) { return x * 2 })
+say doubled // [2, 4, 6, 8, 10]
+
+// Filter — select elements matching a predicate function
+store evens = nums.filter(fn(x) { return x % 2 == 0 })
+say evens // [2, 4]
+
+// Reduce — accumulate a single value from elements
+store sum = nums.reduce(fn(acc, x) { return acc + x }, 0)
+say sum // 15
+
+// Find — return the first element matching a predicate
+store firstOdd = nums.find(fn(x) { return x % 2 != 0 })
+say firstOdd // 1
+
+// Includes — check if array contains a value
+say nums.includes(3) // true
+
+// Reverse — return a reversed copy of the array
+say nums.reverse() // [5, 4, 3, 2, 1]
+
+// Flat — flatten nested arrays by one level
+store nested = [1, [2, 3], 4]
+say nested.flat() // [1, 2, 3, 4]
+
+// Join — join elements into a string with a separator
+say nums.join("-") // "1-2-3-4-5"
+
 // Append — create a new array with added elements (does NOT mutate)
 store newArr = append(nums, 7, 8)
 say newArr  // [1, 2, 3, 4, 5, 7, 8]
@@ -905,6 +934,14 @@ Arrays have built-in methods accessible via dot notation:
 |--------|-------------|---------|
 | `.push(items...)` | Add items to end (mutates) | New length |
 | `.pop()` | Remove & return last item (mutates) | Removed item |
+| `.map(callback)` | Apply callback to each element | New array |
+| `.filter(callback)` | Filter elements matching predicate | New array |
+| `.reduce(callback, init?)` | Accumulate value from elements | Final accumulator |
+| `.find(callback)` | Find first element matching predicate | Matching element or null |
+| `.includes(val)` | Check if array contains value | Boolean |
+| `.reverse()` | Reverse copy of the array | New array |
+| `.flat()` | Flatten array one level deep | New array |
+| `.join(sep?)` | Join elements with a separator string | String |
 | `.length` | Get array length (property) | Number |
 
 ```pen
@@ -918,6 +955,13 @@ say removed         // "blue"
 say colors          // ["red", "green"]
 
 say colors.length   // 2
+
+store numbers = [1, 2, 3]
+say numbers.map(fn(x) { return x * 10 }) // [10, 20, 30]
+say numbers.filter(fn(x) { return x > 1 }) // [2, 3]
+say numbers.reduce(fn(a, b) { return a + b }) // 6
+say numbers.join("-") // "1-2-3"
+```
 ```
 
 ---

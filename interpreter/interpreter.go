@@ -7,10 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/vansh/pengu/ast"
-	"github.com/vansh/pengu/lexer"
-	"github.com/vansh/pengu/parser"
-	"github.com/vansh/pengu/runtime"
+	"github.com/v4nsh0x/pengu/ast"
+	"github.com/v4nsh0x/pengu/lexer"
+	"github.com/v4nsh0x/pengu/parser"
+	"github.com/v4nsh0x/pengu/runtime"
 )
 
 // Interpreter evaluates Pengu AST nodes.
@@ -658,6 +658,175 @@ func (i *Interpreter) execMember(n *ast.MemberExpression, env *runtime.Environme
 				obj.Array = obj.Array[:len(obj.Array)-1]
 				return last, nil
 			}), nil
+		case "map":
+			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+				if len(args) != 1 {
+					return nil, fmt.Errorf("map() expects 1 callback argument")
+				}
+				callback := args[0]
+				resElems := make([]*runtime.Value, len(obj.Array))
+				for idx, elem := range obj.Array {
+					var cbArgs []*runtime.Value
+					if callback.Type == runtime.VAL_FUNCTION {
+						if len(callback.Func.Params) >= 2 {
+							cbArgs = []*runtime.Value{elem, runtime.NewNumber(float64(idx), true)}
+						} else {
+							cbArgs = []*runtime.Value{elem}
+						}
+					} else {
+						cbArgs = []*runtime.Value{elem}
+					}
+
+					val, err := i.invokeCallback(callback, cbArgs, n.Line)
+					if err != nil {
+						return nil, err
+					}
+					resElems[idx] = val
+				}
+				return runtime.NewArray(resElems), nil
+			}), nil
+		case "filter":
+			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+				if len(args) != 1 {
+					return nil, fmt.Errorf("filter() expects 1 callback argument")
+				}
+				callback := args[0]
+				resElems := make([]*runtime.Value, 0)
+				for idx, elem := range obj.Array {
+					var cbArgs []*runtime.Value
+					if callback.Type == runtime.VAL_FUNCTION {
+						if len(callback.Func.Params) >= 2 {
+							cbArgs = []*runtime.Value{elem, runtime.NewNumber(float64(idx), true)}
+						} else {
+							cbArgs = []*runtime.Value{elem}
+						}
+					} else {
+						cbArgs = []*runtime.Value{elem}
+					}
+
+					val, err := i.invokeCallback(callback, cbArgs, n.Line)
+					if err != nil {
+						return nil, err
+					}
+					if val.IsTruthy() {
+						resElems = append(resElems, elem)
+					}
+				}
+				return runtime.NewArray(resElems), nil
+			}), nil
+		case "reduce":
+			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+				if len(args) < 1 || len(args) > 2 {
+					return nil, fmt.Errorf("reduce() expects 1 callback and an optional initial value")
+				}
+				callback := args[0]
+				var acc *runtime.Value
+				startIdx := 0
+
+				if len(args) == 2 {
+					acc = args[1]
+				} else {
+					if len(obj.Array) == 0 {
+						return nil, fmt.Errorf("reduce of empty array with no initial value")
+					}
+					acc = obj.Array[0]
+					startIdx = 1
+				}
+
+				for idx := startIdx; idx < len(obj.Array); idx++ {
+					elem := obj.Array[idx]
+					var cbArgs []*runtime.Value
+					if callback.Type == runtime.VAL_FUNCTION {
+						if len(callback.Func.Params) >= 3 {
+							cbArgs = []*runtime.Value{acc, elem, runtime.NewNumber(float64(idx), true)}
+						} else {
+							cbArgs = []*runtime.Value{acc, elem}
+						}
+					} else {
+						cbArgs = []*runtime.Value{acc, elem}
+					}
+
+					val, err := i.invokeCallback(callback, cbArgs, n.Line)
+					if err != nil {
+						return nil, err
+					}
+					acc = val
+				}
+				return acc, nil
+			}), nil
+		case "find":
+			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+				if len(args) != 1 {
+					return nil, fmt.Errorf("find() expects 1 callback argument")
+				}
+				callback := args[0]
+				for idx, elem := range obj.Array {
+					var cbArgs []*runtime.Value
+					if callback.Type == runtime.VAL_FUNCTION {
+						if len(callback.Func.Params) >= 2 {
+							cbArgs = []*runtime.Value{elem, runtime.NewNumber(float64(idx), true)}
+						} else {
+							cbArgs = []*runtime.Value{elem}
+						}
+					} else {
+						cbArgs = []*runtime.Value{elem}
+					}
+
+					val, err := i.invokeCallback(callback, cbArgs, n.Line)
+					if err != nil {
+						return nil, err
+					}
+					if val.IsTruthy() {
+						return elem, nil
+					}
+				}
+				return runtime.NewNull(), nil
+			}), nil
+		case "includes":
+			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+				if len(args) != 1 {
+					return nil, fmt.Errorf("includes() expects 1 argument")
+				}
+				target := args[0]
+				for _, elem := range obj.Array {
+					if valuesEqual(elem, target) {
+						return runtime.NewBool(true), nil
+					}
+				}
+				return runtime.NewBool(false), nil
+			}), nil
+		case "reverse":
+			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+				resElems := make([]*runtime.Value, len(obj.Array))
+				for idx, elem := range obj.Array {
+					resElems[len(obj.Array)-1-idx] = elem
+				}
+				return runtime.NewArray(resElems), nil
+			}), nil
+		case "flat":
+			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+				resElems := make([]*runtime.Value, 0)
+				for _, elem := range obj.Array {
+					if elem.Type == runtime.VAL_ARRAY {
+						resElems = append(resElems, elem.Array...)
+					} else {
+						resElems = append(resElems, elem)
+					}
+				}
+				return runtime.NewArray(resElems), nil
+			}), nil
+		case "join":
+			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+				sep := ","
+				if len(args) > 0 && args[0].Type == runtime.VAL_STRING {
+					sep = args[0].Str
+				}
+				parts := make([]string, len(obj.Array))
+				for idx, elem := range obj.Array {
+					parts[idx] = elem.String()
+				}
+				return runtime.NewString(strings.Join(parts, sep)), nil
+			}), nil
 		}
 	}
 	// String methods
@@ -743,5 +912,16 @@ func valuesEqual(a, b *runtime.Value) bool {
 		return true
 	default:
 		return a == b // reference equality for arrays/objects
+	}
+}
+
+func (i *Interpreter) invokeCallback(callback *runtime.Value, args []*runtime.Value, line int) (*runtime.Value, error) {
+	switch callback.Type {
+	case runtime.VAL_FUNCTION:
+		return i.callFunction(callback.Func, args, line)
+	case runtime.VAL_BUILTIN:
+		return callback.Builtin(args)
+	default:
+		return nil, fmt.Errorf("Runtime Error:\nCallback must be a function, got %s\nLine %d", callback.TypeName(), line)
 	}
 }
