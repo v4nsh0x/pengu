@@ -168,6 +168,16 @@ curl -L -o pengu https://github.com/v4nsh0x/pengu/releases/latest/download/pengu
 chmod +x pengu
 sudo mv pengu /usr/local/bin/</code></pre>
                     </div>
+
+                    <h4>Windows quick setup (PowerShell):</h4>
+                    <div class="code-block">
+<pre><code class="language-bash"># Create a directory and download the executable
+New-Item -ItemType Directory -Force -Path "C:\pengu"
+Invoke-WebRequest -Uri "https://github.com/v4nsh0x/pengu/releases/latest/download/pengu-windows-amd64.exe" -OutFile "C:\pengu\pengu.exe"
+
+# Add C:\pengu to your system PATH
+[System.Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";C:\pengu", "User")</code></pre>
+                    </div>
                 </div>
 
                 <div class="install-panel" id="panel-source">

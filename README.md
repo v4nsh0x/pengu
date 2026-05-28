@@ -60,6 +60,27 @@ Pengu is the result: a language that is incredibly easy to write, but runs at ne
 
 ## Installation
 
+### Pre-built Binary (Recommended)
+
+Download the latest executable for your platform (Windows, Linux, macOS) directly from the [GitHub Releases](https://github.com/v4nsh0x/pengu/releases). No Go installation is required.
+
+**Linux / macOS Quick Setup:**
+```bash
+curl -L -o pengu https://github.com/v4nsh0x/pengu/releases/latest/download/pengu-linux-amd64
+chmod +x pengu
+sudo mv pengu /usr/local/bin/
+```
+
+**Windows Quick Setup (PowerShell):**
+```powershell
+# Create a directory and download the executable
+New-Item -ItemType Directory -Force -Path "C:\pengu"
+Invoke-WebRequest -Uri "https://github.com/v4nsh0x/pengu/releases/latest/download/pengu-windows-amd64.exe" -OutFile "C:\pengu\pengu.exe"
+
+# Add C:\pengu to your system PATH
+[System.Environment]::SetEnvironmentVariable("PATH", $env:PATH + ";C:\pengu", "User")
+```
+
 ### Build from Source
 
 Requires [Go 1.21+](https://go.dev/dl/).
@@ -70,7 +91,7 @@ cd pengu
 go build -o pengu .
 ```
 
-The `pengu` binary is now ready to use.
+The `pengu` binary is now ready to use. Rename it to `pengu.exe` if you are on Windows, and add it to your PATH.
 
 ---
 
