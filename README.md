@@ -18,20 +18,13 @@ greet(name)
 
 ## Why I Built This
 
-I built Pengu to deeply understand how programming languages actually work under the hood — from raw source code all the way down to execution.
+I started building Pengu because I wanted to understand how programming languages actually work internally instead of just using them.
 
-Most developers use languages every day without ever understanding what happens between writing code and seeing output. I wanted to break open that black box. Building Pengu from scratch meant implementing every layer myself:
+Most people write code every day without thinking about what happens between typing code and seeing it run. I wanted to learn that process from the ground up, so I built everything myself — the lexer, parser, AST, interpreter, runtime, and CLI.
 
-- **Lexer** — how source code gets broken into tokens
-- **Parser** — how tokens form a syntax tree with operator precedence
-- **AST** — how code is represented as a data structure
-- **Interpreter** — how a tree-walking evaluator executes code
-- **Runtime** — how scoping, closures, and memory work
-- **CLI** — how tooling ties everything together
+Working on Pengu taught me how source code gets tokenized, parsed into a syntax tree, evaluated, and executed step by step. Features like variables, functions, closures, loops, and imports all had to be implemented manually in Go without relying on external libraries.
 
-This project was about going low-level to understand how systems interpret and execute code at a fundamental level. Every language feature — variables, functions, closures, loops, imports — had to be built from first principles in Go. No libraries, no shortcuts.
-
-If you're interested in compilers, interpreters, or systems programming, Pengu's codebase is intentionally clean and readable — designed to be studied, not just used.
+The codebase is kept simple and readable on purpose so it’s easy to explore and learn from, especially for people interested in interpreters, compilers, or systems programming.
 
 ---
 
