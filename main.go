@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/vansh/pengu/cli"
+	"github.com/v4nsh0x/pengu/cli"
 )
 
 func main() {

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/vansh/pengu/runtime"
+	"github.com/v4nsh0x/pengu/runtime"
 )
 
 // registerBuiltins adds all built-in functions to the global environment.

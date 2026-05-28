@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/vansh/pengu/ast"
+	"github.com/v4nsh0x/pengu/ast"
 )
 
 // ValueType represents the type of a runtime value.

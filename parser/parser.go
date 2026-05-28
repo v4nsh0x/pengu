@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/vansh/pengu/ast"
-	"github.com/vansh/pengu/lexer"
+	"github.com/v4nsh0x/pengu/ast"
+	"github.com/v4nsh0x/pengu/lexer"
 )
 
 // Parser transforms a token stream into an AST.

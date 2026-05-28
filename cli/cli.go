@@ -9,9 +9,9 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/vansh/pengu/interpreter"
-	"github.com/vansh/pengu/lexer"
-	"github.com/vansh/pengu/parser"
+	"github.com/v4nsh0x/pengu/interpreter"
+	"github.com/v4nsh0x/pengu/lexer"
+	"github.com/v4nsh0x/pengu/parser"
 )
 
 const version = "0.1.0"
@@ -192,7 +192,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/vansh/pengu/interpreter"
+	"github.com/v4nsh0x/pengu/interpreter"
 )
 
 func main() {
@@ -225,9 +225,9 @@ func main() {
 
 go %s
 
-require github.com/vansh/pengu v0.0.0
+require github.com/v4nsh0x/pengu v0.0.0
 
-replace github.com/vansh/pengu => %s
+replace github.com/v4nsh0x/pengu => %s
 `, goVer, penguModPath)
 
 	err = os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644)
