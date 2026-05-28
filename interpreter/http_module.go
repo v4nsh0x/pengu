@@ -116,6 +116,7 @@ func doHttpRequest(method string, args []*runtime.Value) (*runtime.Value, error)
 	respObj := runtime.NewOrderedMap()
 	respObj.Set("status", runtime.NewNumber(float64(resp.StatusCode), true))
 	respObj.Set("text", runtime.NewString(string(bodyBytes)))
+	respObj.Set("body", runtime.NewString(string(bodyBytes))) // Alias for text
 
 	// Build headers object
 	respHeaders := runtime.NewOrderedMap()
