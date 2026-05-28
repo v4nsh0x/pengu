@@ -1,6 +1,9 @@
-say "hello world"
-when 1 == 1 {
-    say "hello world"
-} otherwise {
-    say "hello world"
-}
+use http
+
+store res = http.get("https://jsonplaceholder.typicode.com/todos/1")
+
+say "Status Code: " + toString(res.status)
+say "Server: " + res.headers["Server"]
+
+store data = res.text
+say data
