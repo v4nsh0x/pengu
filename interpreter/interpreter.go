@@ -343,16 +343,45 @@ func (i *Interpreter) execSay(n *ast.SayStatement, env *runtime.Environment) (*r
 }
 
 func (i *Interpreter) execUse(n *ast.UseStatement, env *runtime.Environment) (*runtime.Value, error) {
-	modulePath := filepath.Join(i.basePath, n.Module+".pen")
+	moduleName := n.Module + ".pen"
+
+	// Search paths in order:
+	// 1. Same directory as the current script
+	// 2. modules/ directory next to the pengu executable
+	searchPaths := []string{
+		filepath.Join(i.basePath, moduleName),
+	}
+
+	// Find the pengu executable's directory for built-in modules
+	execPath, err := os.Executable()
+	if err == nil {
+		execDir := filepath.Dir(execPath)
+		searchPaths = append(searchPaths, filepath.Join(execDir, "modules", moduleName))
+	}
+
+	// Try each search path
+	var modulePath string
+	var data []byte
+	for _, path := range searchPaths {
+		d, err := os.ReadFile(path)
+		if err == nil {
+			modulePath = path
+			data = d
+			break
+		}
+	}
+
+	if modulePath == "" {
+		return nil, fmt.Errorf("Runtime Error:\nCould not import module '%s'\nSearched in:\n  %s\nLine %d",
+			n.Module, strings.Join(searchPaths, "\n  "), n.Line)
+	}
+
 	absPath, _ := filepath.Abs(modulePath)
 	if i.imported[absPath] {
 		return nil, nil
 	}
 	i.imported[absPath] = true
-	data, err := os.ReadFile(modulePath)
-	if err != nil {
-		return nil, fmt.Errorf("Runtime Error:\nCould not import module '%s'\nFile not found: %s\nLine %d", n.Module, modulePath, n.Line)
-	}
+
 	l := lexer.New(string(data))
 	tokens, err := l.Tokenize()
 	if err != nil {
