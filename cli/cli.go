@@ -228,10 +228,6 @@ func main() {
 		return fmt.Errorf("could not write build file: %s", err)
 	}
 
-	// Initialize go.mod in temp dir
-	cwd, _ := os.Getwd()
-	penguModPath, _ := filepath.Abs(cwd)
-
 	// Detect Go version dynamically
 	goVer := runtime.Version() // e.g. "go1.25.5"
 	goVer = strings.TrimPrefix(goVer, "go")
@@ -239,23 +235,20 @@ func main() {
 	goMod := fmt.Sprintf(`module pengu-build
 
 go %s
-
-require github.com/v4nsh0x/pengu v0.0.0
-
-replace github.com/v4nsh0x/pengu => %s
-`, goVer, penguModPath)
+`, goVer)
 
 	err = os.WriteFile(filepath.Join(tmpDir, "go.mod"), []byte(goMod), 0644)
 	if err != nil {
 		return fmt.Errorf("could not write go.mod: %s", err)
 	}
 
-	// Run go mod tidy to resolve dependencies
-	tidyCmd := exec.Command("go", "mod", "tidy")
-	tidyCmd.Dir = tmpDir
-	tidyCmd.Stderr = os.Stderr
-	if err := tidyCmd.Run(); err != nil {
-		return fmt.Errorf("go mod tidy failed: %s", err)
+	// Run go get to fetch the exact pengu interpreter version
+	penguPkg := fmt.Sprintf("github.com/v4nsh0x/pengu@v%s", version)
+	getCmd := exec.Command("go", "get", penguPkg)
+	getCmd.Dir = tmpDir
+	getCmd.Stderr = os.Stderr
+	if err := getCmd.Run(); err != nil {
+		return fmt.Errorf("failed to fetch pengu runtime (%s): %s", penguPkg, err)
 	}
 
 	// Build the binary
