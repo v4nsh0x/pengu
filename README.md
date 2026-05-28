@@ -977,7 +977,6 @@ say numbers.filter(fn(x) { return x > 1 }) // [2, 3]
 say numbers.reduce(fn(a, b) { return a + b }) // 6
 say numbers.join("-") // "1-2-3"
 ```
-```
 
 ---
 
