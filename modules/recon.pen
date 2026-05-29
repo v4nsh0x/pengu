@@ -1,0 +1,147 @@
+// Pengu Standard Module: recon
+// Reconnaissance toolkit for cybersecurity automation
+// Depends on: http, net (native modules)
+
+use http
+use net
+
+// fingerprint(url) - Analyze HTTP response headers to identify server technologies
+fn fingerprint(target_url) {
+    store res = http.get(target_url)
+    store info = {}
+
+    // Server header
+    store hdrs = res["headers"]
+    when hdrs["Server"] != null {
+        info["server"] = hdrs["Server"]
+    } otherwise {
+        info["server"] = "unknown"
+    }
+
+    // X-Powered-By
+    when hdrs["X-Powered-By"] != null {
+        info["powered_by"] = hdrs["X-Powered-By"]
+    } otherwise {
+        info["powered_by"] = "unknown"
+    }
+
+    // Technology detection from headers
+    store techs = []
+    when hdrs["Server"] != null {
+        techs = append(techs, hdrs["Server"])
+    }
+    when hdrs["X-Powered-By"] != null {
+        techs = append(techs, hdrs["X-Powered-By"])
+    }
+    when hdrs["X-AspNet-Version"] != null {
+        techs = append(techs, "ASP.NET " + hdrs["X-AspNet-Version"])
+    }
+    when hdrs["X-Generator"] != null {
+        techs = append(techs, hdrs["X-Generator"])
+    }
+    info["technologies"] = techs
+    info["status"] = res["status"]
+
+    return info
+}
+
+// check_headers(url) - Check for security headers
+fn check_headers(target_url) {
+    store res = http.get(target_url)
+    store hdrs = res["headers"]
+    store results = []
+
+    // Define security headers to check
+    store checks = [
+        { name: "Strict-Transport-Security", risk: "high" },
+        { name: "Content-Security-Policy", risk: "high" },
+        { name: "X-Frame-Options", risk: "medium" },
+        { name: "X-Content-Type-Options", risk: "medium" },
+        { name: "X-Xss-Protection", risk: "low" },
+        { name: "Referrer-Policy", risk: "low" },
+        { name: "Permissions-Policy", risk: "medium" }
+    ]
+
+    repeat check in checks {
+        store header_name = check["name"]
+        store status = "missing"
+        when hdrs[header_name] != null {
+            status = "present"
+        }
+        results = append(results, {
+            header: header_name,
+            status: status,
+            risk: check["risk"],
+            value: hdrs[header_name]
+        })
+    }
+
+    return results
+}
+
+// dir_scan(base_url, paths) - Check for common directories/files
+fn dir_scan(base_url, paths) {
+    store found = []
+
+    repeat path in paths {
+        store url = base_url + "/" + path
+        store res = http.get(url, { timeout: 5 })
+        when res["status"] != 404 {
+            found = append(found, {
+                path: "/" + path,
+                status: res["status"]
+            })
+        }
+    }
+
+    return found
+}
+
+// check_sensitive_files(base_url) - Check for commonly exposed sensitive files
+fn check_sensitive_files(base_url) {
+    store sensitive_paths = [
+        ".env",
+        ".git/config",
+        ".git/HEAD",
+        "wp-config.php.bak",
+        "config.php.bak",
+        ".htaccess",
+        "robots.txt",
+        "sitemap.xml",
+        ".DS_Store",
+        "backup.zip",
+        "backup.sql",
+        "phpinfo.php",
+        "server-status",
+        "web.config",
+        ".svn/entries",
+        "crossdomain.xml",
+        "debug.log",
+        "error.log",
+        "admin",
+        "wp-admin",
+        "phpmyadmin"
+    ]
+
+    return dir_scan(base_url, sensitive_paths)
+}
+
+// grab_banner(host, port) - Grab service banner from a port
+fn grab_banner(host, port) {
+    store conn = net.connect(host, port, 3)
+    store banner = conn.recv(1024)
+    conn.close()
+    return banner
+}
+
+// dns_recon(domain) - Comprehensive DNS reconnaissance
+fn dns_recon(domain) {
+    store info = {}
+
+    info["a_records"] = net.dns_lookup(domain)
+    info["mx_records"] = net.lookup_mx(domain)
+    info["ns_records"] = net.lookup_ns(domain)
+    info["txt_records"] = net.lookup_txt(domain)
+
+    return info
+}

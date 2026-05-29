@@ -344,10 +344,19 @@ func (i *Interpreter) execSay(n *ast.SayStatement, env *runtime.Environment) (*r
 
 func (i *Interpreter) execUse(n *ast.UseStatement, env *runtime.Environment) (*runtime.Value, error) {
 	// Check for built-in native modules
-	if n.Module == "http" {
-		if !i.imported["__builtin_http"] {
-			i.imported["__builtin_http"] = true
-			env.Set("http", createHttpModule())
+	nativeModules := map[string]func() *runtime.Value{
+		"http":   createHttpModule,
+		"json":   createJsonModule,
+		"os":     createOsModule,
+		"crypto": createCryptoModule,
+		"net":    createNetModule,
+	}
+
+	if creator, ok := nativeModules[n.Module]; ok {
+		key := "__builtin_" + n.Module
+		if !i.imported[key] {
+			i.imported[key] = true
+			env.Set(n.Module, creator())
 		}
 		return nil, nil
 	}
