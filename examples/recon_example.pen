@@ -1,0 +1,33 @@
+// Recon Module Example
+use recon
+use json
+
+store target = "https://google.com"
+say "Target: " + target
+
+say "\n=== Fingerprinting ==="
+store info = recon.fingerprint(target)
+say "Server: " + info["server"]
+say "Status: " + toString(info["status"])
+say "Technologies: " + json.stringify(info["technologies"])
+
+say "\n=== Security Headers ==="
+store headers = recon.check_headers(target)
+repeat h in headers {
+    store icon = "  [+] "
+    when h["status"] == "missing" {
+        icon = "  [-] "
+    }
+    say icon + h["header"] + " (" + h["status"] + ", risk: " + h["risk"] + ")"
+}
+
+say "\n=== Sensitive Files Check ==="
+say "Scanning for common sensitive files..."
+store files = recon.check_sensitive_files(target)
+when len(files) == 0 {
+    say "  No sensitive files exposed."
+} otherwise {
+    repeat f in files {
+        say "  [!] Exposed: " + f["path"] + " (Status: " + toString(f["status"]) + ")"
+    }
+}

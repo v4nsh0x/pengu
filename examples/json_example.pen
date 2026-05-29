@@ -1,0 +1,26 @@
+// JSON Module Example
+use json
+
+say "=== JSON Stringify ==="
+store user = {
+    username: "admin",
+    role: "superuser",
+    active: true,
+    login_count: 42
+}
+
+store json_str = json.stringify(user)
+say "Minified JSON:"
+say json_str
+
+say "\n=== JSON Pretty Print ==="
+say "Pretty JSON:"
+say json.pretty(user)
+
+say "\n=== JSON Parse ==="
+store raw_data = "{\"name\": \"Pengu Script\", \"version\": 2, \"tags\": [\"security\", \"fast\"]}"
+store parsed = json.parse(raw_data)
+
+say "Parsed Name: " + parsed["name"]
+say "Parsed Version: " + toString(parsed["version"])
+say "Tags: " + json.stringify(parsed["tags"])

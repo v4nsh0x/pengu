@@ -1,0 +1,41 @@
+// Crypto Module Example
+use crypto
+
+store message = "Pengu is awesome!"
+say "Original Message: " + message
+
+say "\n=== Hashing ==="
+say "MD5:    " + crypto.md5(message)
+say "SHA1:   " + crypto.sha1(message)
+say "SHA256: " + crypto.sha256(message)
+say "SHA512: " + crypto.sha512(message)
+
+say "\n=== HMAC ==="
+store key = "super_secret_key"
+say "HMAC-SHA256: " + crypto.hmac_sha256(message, key)
+
+say "\n=== Encodings ==="
+store b64 = crypto.base64_encode(message)
+say "Base64 Encode: " + b64
+say "Base64 Decode: " + crypto.base64_decode(b64)
+
+store hex = crypto.hex_encode(message)
+say "Hex Encode: " + hex
+say "Hex Decode: " + crypto.hex_decode(hex)
+
+store url = "https://example.com/search?q=pengu lang&sort=asc"
+store url_enc = crypto.url_encode(url)
+say "URL Encode: " + url_enc
+say "URL Decode: " + crypto.url_decode(url_enc)
+
+say "\n=== Generation ==="
+say "UUID v4: " + crypto.uuid()
+say "16 Random Bytes (Hex): " + crypto.random_bytes(16)
+
+say "\n=== Timing-Safe Comparison ==="
+store hash1 = crypto.sha256("password")
+store hash2 = crypto.sha256("password")
+store hash3 = crypto.sha256("wrong")
+
+say "hash1 == hash2? " + toString(crypto.compare_hash(hash1, hash2))
+say "hash1 == hash3? " + toString(crypto.compare_hash(hash1, hash3))

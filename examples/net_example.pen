@@ -1,0 +1,55 @@
+// Net Module Example
+use net
+
+store target = "example.com"
+
+say "=== DNS Reconnaissance for " + target + " ==="
+say "\n[*] A Records (IPv4):"
+store ips = net.dns_lookup(target)
+repeat ip in ips {
+    say "  - " + ip
+}
+
+say "\n[*] NS Records (Nameservers):"
+store ns = net.lookup_ns(target)
+repeat server in ns {
+    say "  - " + server
+}
+
+say "\n[*] MX Records (Mail):"
+store mx = net.lookup_mx(target)
+repeat record in mx {
+    say "  - " + record["host"] + " (Priority: " + toString(record["priority"]) + ")"
+}
+
+say "\n[*] TXT Records:"
+store txt = net.lookup_txt(target)
+repeat record in txt {
+    say "  - " + record
+}
+
+say "\n=== Fast Port Scanning ==="
+say "Scanning top ports on " + ips[0] + "..."
+store ports = [21, 22, 23, 25, 53, 80, 110, 143, 443, 445, 3306, 3389, 8080, 8443]
+
+store results = net.scan(ips[0], ports, 2) // 2 second timeout
+repeat port, status in results {
+    when status == "open" {
+        say "  [+] Port " + toString(port) + " is OPEN"
+    }
+}
+
+say "\n=== Raw TCP Connection ==="
+say "Connecting to example.com:80..."
+store conn = net.connect("example.com", 80, 5)
+say "Connected! Sending HTTP GET request..."
+conn.send("GET / HTTP/1.1\r\nHost: example.com\r\nConnection: close\r\n\r\n")
+
+store response = conn.recv(500)
+say "Received response (first 500 bytes):"
+say "---"
+say response
+say "---"
+
+conn.close()
+say "Connection closed."

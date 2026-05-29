@@ -1,0 +1,46 @@
+// OS Module Example
+use os
+
+say "=== System Info ==="
+say "Platform: " + os.platform()
+say "Architecture: " + os.arch()
+say "Current Directory: " + os.cwd()
+
+say "\n=== Environment Variables ==="
+store user = os.env("USER")
+when user == "" {
+    user = os.env("USERNAME", "Unknown User")
+}
+say "Current User: " + user
+say "Path: " + os.env("PATH")
+
+say "\n=== File Operations ==="
+store filename = "pengu_test.txt"
+
+say "Writing to " + filename + "..."
+os.write_file(filename, "Hello from Pengu!")
+
+say "Does file exist? " + toString(os.exists(filename))
+
+say "Appending to file..."
+os.append_file(filename, "\nThis was appended.")
+
+say "Reading file:"
+say "---"
+say os.read_file(filename)
+say "---"
+
+say "Deleting file..."
+os.remove(filename)
+say "File deleted."
+
+say "\n=== Command Execution ==="
+say "Executing 'ping -c 2 google.com' or 'ping -n 2 google.com' based on OS..."
+store cmd = "ping -n 2 google.com"
+when os.platform() != "windows" {
+    cmd = "ping -c 2 google.com"
+}
+
+store result = os.exec(cmd)
+say "Exit Code: " + toString(result["exit_code"])
+say "Output:\n" + result["stdout"]
