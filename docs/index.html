@@ -399,23 +399,73 @@ say doubled // [4, 8]</code></pre>
                 <div class="code-block">
 <pre><code class="language-javascript">use http
 
-// Basic GET request
 store res = http.get("https://jsonplaceholder.typicode.com/todos/1")
-say res.status
+say "Status: " + toString(res.status)
+say "Data: " + res.json()["title"]</code></pre>
+                </div>
 
-// Automatically parse JSON
-store data = res.json()
-say "Title: " + data["title"]
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>http.get(url, options?)</code></td>
+                                <td>Perform an HTTP GET request</td>
+                                <td>Response Object</td>
+                            </tr>
+                            <tr>
+                                <td><code>http.post(url, body?, options?)</code></td>
+                                <td>Perform an HTTP POST request</td>
+                                <td>Response Object</td>
+                            </tr>
+                            <tr>
+                                <td><code>http.put(url, body?, options?)</code></td>
+                                <td>Perform an HTTP PUT request</td>
+                                <td>Response Object</td>
+                            </tr>
+                            <tr>
+                                <td><code>http.delete(url, options?)</code></td>
+                                <td>Perform an HTTP DELETE request</td>
+                                <td>Response Object</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-// POST request with body and headers
-store postRes = http.post(
-    "https://api.example.com/data",
-    { name: "Pengu", secure: true },
-    {
-        headers: { "Authorization": "Bearer token123" },
-        timeout: 5
-    }
-)</code></pre>
+                <h3>Response Object Properties</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Property / Method</th>
+                                <th>Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>status</code></td>
+                                <td>HTTP status code (integer)</td>
+                            </tr>
+                            <tr>
+                                <td><code>text</code> / <code>body</code></td>
+                                <td>Raw string response body</td>
+                            </tr>
+                            <tr>
+                                <td><code>headers</code></td>
+                                <td>Object containing response headers</td>
+                            </tr>
+                            <tr>
+                                <td><code>json()</code></td>
+                                <td>Method that parses the body as JSON</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <p>The response object exposes <code>status</code>, <code>text</code>, <code>body</code>, <code>headers</code>, and the <code>json()</code> method.</p>
@@ -427,15 +477,38 @@ store postRes = http.post(
                 <p>The native <code>json</code> module provides high-speed JSON parsing and stringification.</p>
                 <div class="code-block">
 <pre><code class="language-javascript">use json
-
-// Parse JSON string
 store data = json.parse('{"name": "Pengu", "version": 2}')
+say json.stringify(data)
+say json.pretty(data)</code></pre>
+                </div>
 
-// Convert object to JSON string
-store str = json.stringify({ target: "google.com" })
-
-// Pretty print with indentation
-say json.pretty({ items: [1, 2, 3] })</code></pre>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>json.parse(string)</code></td>
+                                <td>Parses a JSON string into a Pengu object/array</td>
+                                <td>Object / Array</td>
+                            </tr>
+                            <tr>
+                                <td><code>json.stringify(value)</code></td>
+                                <td>Converts a Pengu object/array into a JSON string</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>json.pretty(value)</code></td>
+                                <td>Converts to a JSON string with indentation and line breaks</td>
+                                <td>String</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -445,20 +518,93 @@ say json.pretty({ items: [1, 2, 3] })</code></pre>
                 <p>The <code>os</code> module lets Pengu interact with the underlying operating system. Execute commands, read/write files, and read environment variables.</p>
                 <div class="code-block">
 <pre><code class="language-javascript">use os
-
-// File I/O
 os.write_file("test.txt", "Hello World")
-store content = os.read_file("test.txt")
-store exists = os.exists("test.txt")
-
-// Execute shell commands
 store res = os.exec("ping -c 2 google.com")
-say res["stdout"]
+say os.env("USER")</code></pre>
+                </div>
 
-// Environment & Info
-say os.env("USER")
-say os.platform() // windows, linux, darwin
-say os.cwd()</code></pre>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>os.exec(cmd)</code></td>
+                                <td>Executes a shell command</td>
+                                <td>Object { stdout, stderr, exit_code }</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.env(key, default?)</code></td>
+                                <td>Gets an environment variable</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.platform()</code></td>
+                                <td>Returns the OS (windows, linux, darwin)</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.arch()</code></td>
+                                <td>Returns the architecture (amd64, arm64)</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.cwd()</code></td>
+                                <td>Gets the current working directory</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.read_file(path)</code></td>
+                                <td>Reads a file into a string</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.write_file(path, data)</code></td>
+                                <td>Overwrites a file with string data</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.append_file(path, data)</code></td>
+                                <td>Appends string data to a file</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.exists(path)</code></td>
+                                <td>Checks if a file or directory exists</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.remove(path)</code></td>
+                                <td>Deletes a file or empty directory</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.mkdir(path)</code></td>
+                                <td>Creates a directory</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.list_dir(path)</code></td>
+                                <td>Lists files in a directory</td>
+                                <td>Array of Strings</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.abs_path(path)</code></td>
+                                <td>Gets the absolute path</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>os.exit(code)</code></td>
+                                <td>Terminates the program with exit code</td>
+                                <td>Never</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -468,20 +614,97 @@ say os.cwd()</code></pre>
                 <p>The <code>crypto</code> module exposes fast cryptographic primitives for security automation.</p>
                 <div class="code-block">
 <pre><code class="language-javascript">use crypto
-
-// Hashing
-say crypto.md5("password")
 say crypto.sha256("password")
-say crypto.hmac_sha256("message", "secret")
+say crypto.uuid()</code></pre>
+                </div>
 
-// Encoding
-store b64 = crypto.base64_encode("Hello")
-store hex = crypto.hex_encode("Data")
-store safe = crypto.url_encode("hello world&a=b")
-
-// Generation
-store id = crypto.uuid()
-store bytes = crypto.random_bytes(16)</code></pre>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>crypto.md5(str)</code></td>
+                                <td>Calculates MD5 hash</td>
+                                <td>String (Hex)</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.sha1(str)</code></td>
+                                <td>Calculates SHA1 hash</td>
+                                <td>String (Hex)</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.sha256(str)</code></td>
+                                <td>Calculates SHA256 hash</td>
+                                <td>String (Hex)</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.sha512(str)</code></td>
+                                <td>Calculates SHA512 hash</td>
+                                <td>String (Hex)</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.hmac_sha256(msg, key)</code></td>
+                                <td>Calculates HMAC-SHA256 signature</td>
+                                <td>String (Hex)</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.hmac_sha512(msg, key)</code></td>
+                                <td>Calculates HMAC-SHA512 signature</td>
+                                <td>String (Hex)</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.base64_encode(str)</code></td>
+                                <td>Encodes string to Base64</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.base64_decode(str)</code></td>
+                                <td>Decodes Base64 string</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.hex_encode(str)</code></td>
+                                <td>Encodes string to Hex</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.hex_decode(str)</code></td>
+                                <td>Decodes Hex string</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.url_encode(str)</code></td>
+                                <td>URL-escapes a string</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.url_decode(str)</code></td>
+                                <td>Unescapes a URL string</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.uuid()</code></td>
+                                <td>Generates a random UUID v4</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.random_bytes(n)</code></td>
+                                <td>Generates N secure random bytes</td>
+                                <td>String (Hex)</td>
+                            </tr>
+                            <tr>
+                                <td><code>crypto.compare_hash(a, b)</code></td>
+                                <td>Timing-safe hash comparison</td>
+                                <td>Boolean</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -491,25 +714,92 @@ store bytes = crypto.random_bytes(16)</code></pre>
                 <p>The <code>net</code> module handles raw TCP networking, concurrent port scanning, and comprehensive DNS lookups.</p>
                 <div class="code-block">
 <pre><code class="language-javascript">use net
-
-// DNS Recon
 store ips = net.dns_lookup("google.com")
-store mx = net.lookup_mx("google.com")
+store ports = net.scan(ips[0], [80, 443, 8080], 2) // 2s timeout</code></pre>
+                </div>
 
-// Concurrent Port Scanning
-// Scans ports on target with a 2 second timeout
-store ports = net.scan(ips[0], [80, 443, 8080, 3306], 2)
-repeat port, status in ports {
-    when status == "open" {
-        say "Port " + port + " is OPEN"
-    }
-}
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>net.scan(host, [ports], timeout?)</code></td>
+                                <td>Concurrently scans an array of ports</td>
+                                <td>Object { port: "open"|"closed" }</td>
+                            </tr>
+                            <tr>
+                                <td><code>net.scan_range(host, start, end, timeout?)</code></td>
+                                <td>Concurrently scans a range of ports</td>
+                                <td>Array of open ports</td>
+                            </tr>
+                            <tr>
+                                <td><code>net.connect(host, port, timeout?)</code></td>
+                                <td>Creates a raw TCP connection</td>
+                                <td>Connection Object</td>
+                            </tr>
+                            <tr>
+                                <td><code>net.dns_lookup(domain)</code></td>
+                                <td>Resolves A records (IPv4)</td>
+                                <td>Array of Strings</td>
+                            </tr>
+                            <tr>
+                                <td><code>net.reverse_dns(ip)</code></td>
+                                <td>Performs a reverse DNS lookup</td>
+                                <td>Array of Strings</td>
+                            </tr>
+                            <tr>
+                                <td><code>net.lookup_mx(domain)</code></td>
+                                <td>Resolves MX (mail) records</td>
+                                <td>Array of Objects</td>
+                            </tr>
+                            <tr>
+                                <td><code>net.lookup_ns(domain)</code></td>
+                                <td>Resolves NS (nameserver) records</td>
+                                <td>Array of Strings</td>
+                            </tr>
+                            <tr>
+                                <td><code>net.lookup_txt(domain)</code></td>
+                                <td>Resolves TXT records</td>
+                                <td>Array of Strings</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
-// Raw TCP Connections
-store conn = net.connect("example.com", 80)
-conn.send("GET / HTTP/1.1\r\n\r\n")
-store res = conn.recv(1024)
-conn.close()</code></pre>
+                <h3>Connection Object Methods</h3>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>conn.send(string)</code></td>
+                                <td>Writes data to the TCP socket</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>conn.recv(size?)</code></td>
+                                <td>Reads data from the TCP socket</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>conn.close()</code></td>
+                                <td>Closes the TCP connection</td>
+                                <td>Boolean</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 
@@ -520,16 +810,52 @@ conn.close()</code></pre>
                 <p>First install it using <code>pengu install recon</code>, then use it in your scripts:</p>
                 <div class="code-block">
 <pre><code class="language-javascript">use recon
-
-// Fingerprint server technologies
 store info = fingerprint("https://google.com")
-say info["server"] // "gws"
+say info["server"]</code></pre>
+                </div>
 
-// Audit security headers
-store headers = check_headers("https://google.com")
-
-// Scan for sensitive files (.env, .git, backup.zip, etc)
-store files = check_sensitive_files("https://example.com")</code></pre>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>fingerprint(url)</code></td>
+                                <td>Analyzes HTTP headers to identify server technologies</td>
+                                <td>Object (server, powered_by, technologies)</td>
+                            </tr>
+                            <tr>
+                                <td><code>check_headers(url)</code></td>
+                                <td>Audits security headers (HSTS, CSP, X-Frame-Options)</td>
+                                <td>Array of Objects</td>
+                            </tr>
+                            <tr>
+                                <td><code>check_sensitive_files(url)</code></td>
+                                <td>Scans for exposed files (.env, .git, backups)</td>
+                                <td>Array of Objects</td>
+                            </tr>
+                            <tr>
+                                <td><code>dir_scan(url, [paths])</code></td>
+                                <td>Checks if an array of paths exists on the server</td>
+                                <td>Array of Objects</td>
+                            </tr>
+                            <tr>
+                                <td><code>grab_banner(host, port)</code></td>
+                                <td>Connects via TCP and reads the service banner</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>dns_recon(domain)</code></td>
+                                <td>Performs A, MX, NS, and TXT lookups at once</td>
+                                <td>Object</td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
             </section>
 

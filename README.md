@@ -1007,62 +1007,93 @@ Pengu ships with high-performance native modules built in Go, plus external modu
 
 ### Native: `http`
 Makes blazing fast REST API calls.
-```pen
-use http
-store res = http.get("https://api.github.com/users/v4nsh0x")
-say res.json()["name"]
-```
+
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `http.get(url, options?)` | Perform an HTTP GET request | Response Object |
+| `http.post(url, body?, options?)` | Perform an HTTP POST request | Response Object |
+| `http.put(url, body?, options?)` | Perform an HTTP PUT request | Response Object |
+| `http.delete(url, options?)` | Perform an HTTP DELETE request | Response Object |
+
+**Response Object:** Contains `status`, `text`, `body`, `headers`, and a `json()` method.
 
 ### Native: `json`
 Provides high-speed JSON parsing and stringification.
-```pen
-use json
-store data = json.parse('{"name": "Pengu"}')
-say json.stringify(data)
-say json.pretty(data)
-```
+
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `json.parse(str)` | Parses JSON string into a Pengu object | Object/Array |
+| `json.stringify(val)` | Converts an object to a JSON string | String |
+| `json.pretty(val)` | Converts to a pretty JSON string | String |
 
 ### Native: `os`
 Interact with the operating system, file system, and shell.
-```pen
-use os
-os.write_file("test.txt", "Hello World")
-say os.read_file("test.txt")
-store res = os.exec("ping -c 2 google.com")
-say os.env("USER")
-```
+
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `os.exec(cmd)` | Executes a shell command | Object `{ stdout, stderr, exit_code }` |
+| `os.env(key, def?)` | Gets an environment variable | String |
+| `os.platform()` | Returns OS (windows, linux, darwin) | String |
+| `os.arch()` | Returns architecture (amd64, arm64) | String |
+| `os.cwd()` | Gets current working directory | String |
+| `os.read_file(path)` | Reads file into a string | String |
+| `os.write_file(path, data)`| Overwrites file with string data | Boolean |
+| `os.append_file(path, data)`| Appends string data to file | Boolean |
+| `os.exists(path)` | Checks if file/directory exists | Boolean |
+| `os.remove(path)` | Deletes a file/directory | Boolean |
+| `os.mkdir(path)` | Creates a directory | Boolean |
+| `os.list_dir(path)`| Lists files in a directory | Array of Strings |
+| `os.abs_path(path)`| Gets the absolute path | String |
+| `os.exit(code)` | Terminates the program | Never |
 
 ### Native: `crypto`
 Cryptographic primitives for security tooling.
-```pen
-use crypto
-say crypto.sha256("password")
-say crypto.hmac_sha256("message", "secret")
-say crypto.base64_encode("data")
-say crypto.uuid()
-```
+
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `crypto.md5(str)` | MD5 hash | String (Hex) |
+| `crypto.sha1(str)` | SHA1 hash | String (Hex) |
+| `crypto.sha256(str)` | SHA256 hash | String (Hex) |
+| `crypto.sha512(str)` | SHA512 hash | String (Hex) |
+| `crypto.hmac_sha256(msg, key)`| HMAC-SHA256 | String (Hex) |
+| `crypto.hmac_sha512(msg, key)`| HMAC-SHA512 | String (Hex) |
+| `crypto.base64_encode(str)` | Base64 encode | String |
+| `crypto.base64_decode(str)` | Base64 decode | String |
+| `crypto.hex_encode(str)` | Hex encode | String |
+| `crypto.hex_decode(str)` | Hex decode | String |
+| `crypto.url_encode(str)` | URL encode | String |
+| `crypto.url_decode(str)` | URL decode | String |
+| `crypto.uuid()` | Generate UUID v4 | String |
+| `crypto.random_bytes(n)` | N secure random bytes | String (Hex) |
+| `crypto.compare_hash(a, b)` | Timing-safe compare | Boolean |
 
 ### Native: `net`
 Raw TCP networking, port scanning, and DNS lookups.
-```pen
-use net
-store ips = net.dns_lookup("google.com")
-store ports = net.scan(ips[0], [80, 443, 8080], 2) // 2s timeout
 
-store conn = net.connect("example.com", 80)
-conn.send("GET / HTTP/1.1\r\n\r\n")
-say conn.recv(1024)
-conn.close()
-```
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `net.scan(host, [ports], to?)`| Concurrent scan of an array of ports | Object `{ port: status }` |
+| `net.scan_range(host, start, end, to?)`| Concurrent scan of a port range | Array of open ports |
+| `net.connect(host, port, to?)`| Creates a raw TCP connection | Connection Object |
+| `net.dns_lookup(domain)` | Resolves A records (IPv4) | Array of Strings |
+| `net.reverse_dns(ip)` | Reverse DNS lookup | Array of Strings |
+| `net.lookup_mx(domain)` | Resolves MX records | Array of Objects |
+| `net.lookup_ns(domain)` | Resolves NS records | Array of Strings |
+| `net.lookup_txt(domain)` | Resolves TXT records | Array of Strings |
+
+**Connection Object:** Contains `send(data)`, `recv(size?)`, and `close()` methods.
 
 ### External: `recon`
 Cybersecurity reconnaissance automation (requires `pengu install recon`).
-```pen
-use recon
-store info = fingerprint("https://google.com")
-say info["server"] // "gws"
-store files = check_sensitive_files("https://example.com")
-```
+
+| Method | Description | Returns |
+|--------|-------------|---------|
+| `fingerprint(url)` | Analyzes HTTP headers for server tech | Object |
+| `check_headers(url)` | Audits security headers (HSTS, CSP, etc) | Array of Objects |
+| `check_sensitive_files(url)` | Scans for exposed files (.env, .git) | Array of Objects |
+| `dir_scan(url, [paths])` | Checks if paths exist on the server | Array of Objects |
+| `grab_banner(host, port)` | Reads the service banner via TCP | String |
+| `dns_recon(domain)` | Comprehensive DNS lookup (A, MX, NS, TXT) | Object |
 
 ---
 
