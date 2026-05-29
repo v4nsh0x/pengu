@@ -13,6 +13,7 @@ const (
 	TOKEN_INT     // integer literals
 	TOKEN_FLOAT   // float literals
 	TOKEN_STRING  // string literals
+	TOKEN_FSTRING // f-string literals
 	TOKEN_TRUE    // true
 	TOKEN_FALSE   // false
 	TOKEN_NULL    // null
@@ -29,6 +30,8 @@ const (
 	TOKEN_USE       // use
 	TOKEN_BREAK     // break
 	TOKEN_CONTINUE  // continue
+	TOKEN_TRY       // try
+	TOKEN_CATCH     // catch
 
 	// Operators
 	TOKEN_PLUS     // +
@@ -84,6 +87,8 @@ var keywords = map[string]TokenType{
 	"null":      TOKEN_NULL,
 	"break":     TOKEN_BREAK,
 	"continue":  TOKEN_CONTINUE,
+	"try":       TOKEN_TRY,
+	"catch":     TOKEN_CATCH,
 }
 
 // LookupIdent checks if an identifier is a keyword and returns the appropriate token type.
@@ -109,6 +114,8 @@ func (t TokenType) String() string {
 		return "FLOAT"
 	case TOKEN_STRING:
 		return "STRING"
+	case TOKEN_FSTRING:
+		return "FSTRING"
 	case TOKEN_TRUE:
 		return "TRUE"
 	case TOKEN_FALSE:
@@ -137,6 +144,10 @@ func (t TokenType) String() string {
 		return "BREAK"
 	case TOKEN_CONTINUE:
 		return "CONTINUE"
+	case TOKEN_TRY:
+		return "TRY"
+	case TOKEN_CATCH:
+		return "CATCH"
 	case TOKEN_PLUS:
 		return "+"
 	case TOKEN_MINUS:

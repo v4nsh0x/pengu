@@ -152,7 +152,13 @@ func (l *Lexer) nextToken() (Token, error) {
 
 	// Strings
 	if ch == '"' {
-		return l.readString()
+		return l.readString(false)
+	}
+
+	// F-Strings and Identifiers
+	if ch == 'f' && l.peekNext() == '"' {
+		l.advance() // consume 'f'
+		return l.readString(true)
 	}
 
 	// Numbers
@@ -238,7 +244,7 @@ func (l *Lexer) nextToken() (Token, error) {
 }
 
 // readString reads a string literal enclosed in double quotes.
-func (l *Lexer) readString() (Token, error) {
+func (l *Lexer) readString(isFString bool) (Token, error) {
 	line := l.line
 	col := l.col
 	l.advance() // skip opening "
@@ -248,7 +254,11 @@ func (l *Lexer) readString() (Token, error) {
 		ch := l.peek()
 		if ch == '"' {
 			l.advance() // skip closing "
-			return l.makeToken(TOKEN_STRING, sb.String(), line, col), nil
+			tokType := TOKEN_STRING
+			if isFString {
+				tokType = TOKEN_FSTRING
+			}
+			return l.makeToken(tokType, sb.String(), line, col), nil
 		}
 		if ch == '\\' {
 			l.advance()

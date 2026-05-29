@@ -50,6 +50,11 @@ func (p *Parser) Parse() (*ast.Program, error) {
 	return program, nil
 }
 
+// ParseExpressionSnippet is for evaluating expressions inside f-strings
+func (p *Parser) ParseExpressionSnippet() (ast.Node, error) {
+	return p.parseExpression()
+}
+
 // --- Token helpers ---
 
 func (p *Parser) peek() lexer.Token {
@@ -137,6 +142,8 @@ func (p *Parser) parseStatement() (ast.Node, error) {
 		return p.parseBreakStatement()
 	case lexer.TOKEN_CONTINUE:
 		return p.parseContinueStatement()
+	case lexer.TOKEN_TRY:
+		return p.parseTryCatchStatement()
 	default:
 		return p.parseExpressionStatement()
 	}
@@ -236,9 +243,19 @@ func (p *Parser) parseIfStatement() (ast.Node, error) {
 
 	if p.peekType() == lexer.TOKEN_OTHERWISE {
 		p.advance() // consume 'otherwise'
-		elseBody, err = p.parseBlock()
-		if err != nil {
-			return nil, err
+		p.skipNewlines()
+
+		if p.peekType() == lexer.TOKEN_WHEN {
+			ifStmt, err := p.parseIfStatement()
+			if err != nil {
+				return nil, err
+			}
+			elseBody = []ast.Node{ifStmt}
+		} else {
+			elseBody, err = p.parseBlock()
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
@@ -255,11 +272,16 @@ func (p *Parser) parseRepeatStatement() (ast.Node, error) {
 	tok := p.advance() // consume 'repeat'
 	line := tok.Line
 
-	// Check for: repeat item in collection { body }
-	// We look ahead to see if we have: IDENT IN ...
-	if p.peekType() == lexer.TOKEN_IDENT && p.lookAhead(1).Type == lexer.TOKEN_IN {
+	// Check for: repeat item in collection { body } OR repeat key, val in collection { body }
+	if p.peekType() == lexer.TOKEN_IDENT && (p.lookAhead(1).Type == lexer.TOKEN_IN || (p.lookAhead(1).Type == lexer.TOKEN_COMMA && p.lookAhead(2).Type == lexer.TOKEN_IDENT && p.lookAhead(3).Type == lexer.TOKEN_IN)) {
 		iteratorTok := p.advance() // consume iterator name
-		p.advance()                // consume 'in'
+		var valueIterator string
+		if p.peekType() == lexer.TOKEN_COMMA {
+			p.advance() // consume ','
+			valTok := p.advance() // consume value iterator name
+			valueIterator = valTok.Value
+		}
+		p.advance() // consume 'in'
 
 		collection, err := p.parseExpression()
 		if err != nil {
@@ -272,10 +294,11 @@ func (p *Parser) parseRepeatStatement() (ast.Node, error) {
 		}
 
 		return &ast.RepeatStatement{
-			Iterator:   iteratorTok.Value,
-			Collection: collection,
-			Body:       body,
-			Line:       line,
+			Iterator:      iteratorTok.Value,
+			ValueIterator: valueIterator,
+			Collection:    collection,
+			Body:          body,
+			Line:          line,
 		}, nil
 	}
 
@@ -428,6 +451,40 @@ func (p *Parser) parseContinueStatement() (ast.Node, error) {
 	tok := p.advance() // consume 'continue'
 	p.expectStatementEnd()
 	return &ast.ContinueStatement{Line: tok.Line}, nil
+}
+
+func (p *Parser) parseTryCatchStatement() (ast.Node, error) {
+	tok := p.advance() // consume 'try'
+	line := tok.Line
+
+	tryBody, err := p.parseBlock()
+	if err != nil {
+		return nil, err
+	}
+
+	p.skipNewlines()
+	if p.peekType() != lexer.TOKEN_CATCH {
+		return nil, fmt.Errorf("Syntax Error:\nExpected 'catch' after 'try' block\nLine %d", tok.Line)
+	}
+	p.advance() // consume 'catch'
+
+	var catchVar string
+	if p.peekType() == lexer.TOKEN_IDENT {
+		catchVarTok := p.advance()
+		catchVar = catchVarTok.Value
+	}
+
+	catchBody, err := p.parseBlock()
+	if err != nil {
+		return nil, err
+	}
+
+	return &ast.TryCatchStatement{
+		TryBody:   tryBody,
+		CatchVar:  catchVar,
+		CatchBody: catchBody,
+		Line:      line,
+	}, nil
 }
 
 // parseExpressionStatement handles assignments and bare expression statements.
@@ -750,6 +807,10 @@ func (p *Parser) parsePrimary() (ast.Node, error) {
 	case lexer.TOKEN_STRING:
 		p.advance()
 		return &ast.StringLiteral{Value: tok.Value, Line: tok.Line}, nil
+
+	case lexer.TOKEN_FSTRING:
+		p.advance()
+		return &ast.FStringLiteral{Value: tok.Value, Line: tok.Line}, nil
 
 	case lexer.TOKEN_TRUE:
 		p.advance()

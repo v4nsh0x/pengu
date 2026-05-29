@@ -57,8 +57,9 @@ type (
 		Count Node
 
 		// For for-each: Iterator and Collection are set
-		Iterator   string
-		Collection Node
+		Iterator      string
+		ValueIterator string
+		Collection    Node
 
 		// For conditional: Condition is set
 		Condition Node
@@ -88,6 +89,14 @@ type (
 	ContinueStatement struct {
 		Line int
 	}
+
+	// TryCatchStatement represents: try { body } catch err { catchBody }
+	TryCatchStatement struct {
+		TryBody   []Node
+		CatchVar  string
+		CatchBody []Node
+		Line      int
+	}
 )
 
 // Expression nodes
@@ -107,6 +116,12 @@ type (
 
 	// StringLiteral represents a string value.
 	StringLiteral struct {
+		Value string
+		Line  int
+	}
+
+	// FStringLiteral represents an f-string value.
+	FStringLiteral struct {
 		Value string
 		Line  int
 	}
@@ -184,9 +199,11 @@ func (s *SayStatement) nodeType() string         { return "SayStatement" }
 func (u *UseStatement) nodeType() string         { return "UseStatement" }
 func (b *BreakStatement) nodeType() string       { return "BreakStatement" }
 func (c *ContinueStatement) nodeType() string    { return "ContinueStatement" }
+func (t *TryCatchStatement) nodeType() string    { return "TryCatchStatement" }
 func (i *Identifier) nodeType() string           { return "Identifier" }
 func (n *NumberLiteral) nodeType() string        { return "NumberLiteral" }
 func (s *StringLiteral) nodeType() string        { return "StringLiteral" }
+func (s *FStringLiteral) nodeType() string       { return "FStringLiteral" }
 func (b *BooleanLiteral) nodeType() string       { return "BooleanLiteral" }
 func (n *NullLiteral) nodeType() string          { return "NullLiteral" }
 func (a *ArrayLiteral) nodeType() string         { return "ArrayLiteral" }

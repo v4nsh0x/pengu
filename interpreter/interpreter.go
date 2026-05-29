@@ -5,6 +5,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/v4nsh0x/pengu/ast"
@@ -95,6 +96,8 @@ func (i *Interpreter) exec(node ast.Node, env *runtime.Environment) (*runtime.Va
 		return runtime.NewBreak(), nil
 	case *ast.ContinueStatement:
 		return runtime.NewContinue(), nil
+	case *ast.TryCatchStatement:
+		return i.execTryCatch(n, env)
 	case *ast.BinaryExpression:
 		return i.execBinary(n, env)
 	case *ast.UnaryExpression:
@@ -115,6 +118,8 @@ func (i *Interpreter) exec(node ast.Node, env *runtime.Environment) (*runtime.Va
 		return runtime.NewNumber(n.Value, n.IsInt), nil
 	case *ast.StringLiteral:
 		return runtime.NewString(n.Value), nil
+	case *ast.FStringLiteral:
+		return i.execFString(n, env)
 	case *ast.BooleanLiteral:
 		return runtime.NewBool(n.Value), nil
 	case *ast.NullLiteral:
@@ -209,6 +214,57 @@ func (i *Interpreter) execIf(n *ast.IfStatement, env *runtime.Environment) (*run
 	return nil, nil
 }
 
+func (i *Interpreter) execTryCatch(n *ast.TryCatchStatement, env *runtime.Environment) (*runtime.Value, error) {
+	tryEnv := runtime.NewEnvironment(env)
+	result, err := i.execBlock(n.TryBody, tryEnv)
+	if err != nil {
+		// An error occurred, execute catch block
+		catchEnv := runtime.NewEnvironment(env)
+		if n.CatchVar != "" {
+			// Strip the "Runtime Error:\n" prefix for cleaner error messages in catch if we want,
+			// or just give the raw error string
+			catchEnv.Set(n.CatchVar, runtime.NewString(err.Error()))
+		}
+		// Reset the error, handle it
+		return i.execBlock(n.CatchBody, catchEnv)
+	}
+	// No error occurred
+	return result, nil
+}
+
+func (i *Interpreter) execFString(n *ast.FStringLiteral, env *runtime.Environment) (*runtime.Value, error) {
+	str := n.Value
+	re := regexp.MustCompile(`\{([^}]+)\}`)
+	matches := re.FindAllStringSubmatch(str, -1)
+	
+	for _, match := range matches {
+		fullMatch := match[0]
+		exprStr := match[1]
+		
+		// Lex and parse the expression snippet
+		l := lexer.New(exprStr)
+		tokens, err := l.Tokenize()
+		if err != nil {
+			return nil, fmt.Errorf("FString Lex Error:\n%v\nLine %d", err, n.Line)
+		}
+		
+		p := parser.New(tokens)
+		exprAst, err := p.ParseExpressionSnippet()
+		if err != nil {
+			return nil, fmt.Errorf("FString Parse Error:\n%v\nLine %d", err, n.Line)
+		}
+		
+		val, err := i.exec(exprAst, env)
+		if err != nil {
+			return nil, err
+		}
+		
+		str = strings.Replace(str, fullMatch, val.String(), 1)
+	}
+	
+	return runtime.NewString(str), nil
+}
+
 func (i *Interpreter) execRepeat(n *ast.RepeatStatement, env *runtime.Environment) (*runtime.Value, error) {
 	if n.Iterator != "" && n.Collection != nil {
 		return i.execForEach(n, env)
@@ -259,9 +315,12 @@ func (i *Interpreter) execForEach(n *ast.RepeatStatement, env *runtime.Environme
 	}
 	switch collection.Type {
 	case runtime.VAL_ARRAY:
-		for _, elem := range collection.Array {
+		for idx, elem := range collection.Array {
 			blockEnv := runtime.NewEnvironment(env)
 			blockEnv.Set(n.Iterator, elem)
+			if n.ValueIterator != "" {
+				blockEnv.Set(n.ValueIterator, runtime.NewNumber(float64(idx), true))
+			}
 			result, err := i.execBlock(n.Body, blockEnv)
 			if err != nil {
 				return nil, err
@@ -282,6 +341,10 @@ func (i *Interpreter) execForEach(n *ast.RepeatStatement, env *runtime.Environme
 		for _, key := range collection.Object.Keys {
 			blockEnv := runtime.NewEnvironment(env)
 			blockEnv.Set(n.Iterator, runtime.NewString(key))
+			if n.ValueIterator != "" {
+				val, _ := collection.Object.Get(key)
+				blockEnv.Set(n.ValueIterator, val)
+			}
 			result, err := i.execBlock(n.Body, blockEnv)
 			if err != nil {
 				return nil, err
