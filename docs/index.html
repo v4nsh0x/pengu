@@ -96,6 +96,11 @@ say nums.map(fn(x) { return x * 2 })</code></pre>
                     <li><a href="#arrays">Array Methods</a></li>
                     <li><a href="#strings">String Methods</a></li>
                     <li><a href="#http">HTTP Module</a></li>
+                    <li><a href="#json">JSON Module</a></li>
+                    <li><a href="#os">OS Module</a></li>
+                    <li><a href="#crypto">Crypto Module</a></li>
+                    <li><a href="#net">Net Module</a></li>
+                    <li><a href="#recon">Recon Module (External)</a></li>
                 </ul>
 
                 <h3>About</h3>
@@ -414,6 +419,118 @@ store postRes = http.post(
                 </div>
 
                 <p>The response object exposes <code>status</code>, <code>text</code>, <code>body</code>, <code>headers</code>, and the <code>json()</code> method.</p>
+            </section>
+
+            <section id="json">
+                <h2>JSON Module</h2>
+                <div class="badge-module">Native Built-in</div>
+                <p>The native <code>json</code> module provides high-speed JSON parsing and stringification.</p>
+                <div class="code-block">
+<pre><code class="language-javascript">use json
+
+// Parse JSON string
+store data = json.parse('{"name": "Pengu", "version": 2}')
+
+// Convert object to JSON string
+store str = json.stringify({ target: "google.com" })
+
+// Pretty print with indentation
+say json.pretty({ items: [1, 2, 3] })</code></pre>
+                </div>
+            </section>
+
+            <section id="os">
+                <h2>OS Module</h2>
+                <div class="badge-module">Native Built-in</div>
+                <p>The <code>os</code> module lets Pengu interact with the underlying operating system. Execute commands, read/write files, and read environment variables.</p>
+                <div class="code-block">
+<pre><code class="language-javascript">use os
+
+// File I/O
+os.write_file("test.txt", "Hello World")
+store content = os.read_file("test.txt")
+store exists = os.exists("test.txt")
+
+// Execute shell commands
+store res = os.exec("ping -c 2 google.com")
+say res["stdout"]
+
+// Environment & Info
+say os.env("USER")
+say os.platform() // windows, linux, darwin
+say os.cwd()</code></pre>
+                </div>
+            </section>
+
+            <section id="crypto">
+                <h2>Crypto Module</h2>
+                <div class="badge-module">Native Built-in</div>
+                <p>The <code>crypto</code> module exposes fast cryptographic primitives for security automation.</p>
+                <div class="code-block">
+<pre><code class="language-javascript">use crypto
+
+// Hashing
+say crypto.md5("password")
+say crypto.sha256("password")
+say crypto.hmac_sha256("message", "secret")
+
+// Encoding
+store b64 = crypto.base64_encode("Hello")
+store hex = crypto.hex_encode("Data")
+store safe = crypto.url_encode("hello world&a=b")
+
+// Generation
+store id = crypto.uuid()
+store bytes = crypto.random_bytes(16)</code></pre>
+                </div>
+            </section>
+
+            <section id="net">
+                <h2>Net Module</h2>
+                <div class="badge-module">Native Built-in</div>
+                <p>The <code>net</code> module handles raw TCP networking, concurrent port scanning, and comprehensive DNS lookups.</p>
+                <div class="code-block">
+<pre><code class="language-javascript">use net
+
+// DNS Recon
+store ips = net.dns_lookup("google.com")
+store mx = net.lookup_mx("google.com")
+
+// Concurrent Port Scanning
+// Scans ports on target with a 2 second timeout
+store ports = net.scan(ips[0], [80, 443, 8080, 3306], 2)
+repeat port, status in ports {
+    when status == "open" {
+        say "Port " + port + " is OPEN"
+    }
+}
+
+// Raw TCP Connections
+store conn = net.connect("example.com", 80)
+conn.send("GET / HTTP/1.1\r\n\r\n")
+store res = conn.recv(1024)
+conn.close()</code></pre>
+                </div>
+            </section>
+
+            <section id="recon">
+                <h2>Recon Module</h2>
+                <div class="badge-module">External (requires install)</div>
+                <p>The <code>recon</code> module is a high-level external module written in Pengu that automates web and network reconnaissance.</p>
+                <p>First install it using <code>pengu install recon</code>, then use it in your scripts:</p>
+                <div class="code-block">
+<pre><code class="language-javascript">use recon
+
+// Fingerprint server technologies
+store info = fingerprint("https://google.com")
+say info["server"] // "gws"
+
+// Audit security headers
+store headers = check_headers("https://google.com")
+
+// Scan for sensitive files (.env, .git, backup.zip, etc)
+store files = check_sensitive_files("https://example.com")</code></pre>
+                </div>
             </section>
 
             <hr class="divider">

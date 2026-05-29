@@ -1001,6 +1001,71 @@ say numbers.join("-") // "1-2-3"
 
 ---
 
+## Standard Modules
+
+Pengu ships with high-performance native modules built in Go, plus external modules you can install via `pengu install`.
+
+### Native: `http`
+Makes blazing fast REST API calls.
+```pen
+use http
+store res = http.get("https://api.github.com/users/v4nsh0x")
+say res.json()["name"]
+```
+
+### Native: `json`
+Provides high-speed JSON parsing and stringification.
+```pen
+use json
+store data = json.parse('{"name": "Pengu"}')
+say json.stringify(data)
+say json.pretty(data)
+```
+
+### Native: `os`
+Interact with the operating system, file system, and shell.
+```pen
+use os
+os.write_file("test.txt", "Hello World")
+say os.read_file("test.txt")
+store res = os.exec("ping -c 2 google.com")
+say os.env("USER")
+```
+
+### Native: `crypto`
+Cryptographic primitives for security tooling.
+```pen
+use crypto
+say crypto.sha256("password")
+say crypto.hmac_sha256("message", "secret")
+say crypto.base64_encode("data")
+say crypto.uuid()
+```
+
+### Native: `net`
+Raw TCP networking, port scanning, and DNS lookups.
+```pen
+use net
+store ips = net.dns_lookup("google.com")
+store ports = net.scan(ips[0], [80, 443, 8080], 2) // 2s timeout
+
+store conn = net.connect("example.com", 80)
+conn.send("GET / HTTP/1.1\r\n\r\n")
+say conn.recv(1024)
+conn.close()
+```
+
+### External: `recon`
+Cybersecurity reconnaissance automation (requires `pengu install recon`).
+```pen
+use recon
+store info = fingerprint("https://google.com")
+say info["server"] // "gws"
+store files = check_sensitive_files("https://example.com")
+```
+
+---
+
 ## Error Handling
 
 Pengu provides clear, friendly error messages with line numbers.
