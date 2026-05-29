@@ -715,7 +715,13 @@ say crypto.uuid()</code></pre>
                 <div class="code-block">
 <pre><code class="language-javascript">use net
 store ips = net.dns_lookup("google.com")
-store ports = net.scan(ips[0], [80, 443, 8080], 2) // 2s timeout</code></pre>
+store ports = net.scan(ips[0], [80, 443, 8080], 2) // 2s timeout
+repeat port in ports {
+    store status = ports[port]
+    when status == "open" {
+        say "Port " + port + " is OPEN"
+    }
+}</code></pre>
                 </div>
 
                 <div class="table-container">

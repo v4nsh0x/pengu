@@ -33,9 +33,10 @@ say "Scanning top ports on " + ips[0] + "..."
 store ports = [21, 22, 23, 25, 53, 80, 110, 143, 443, 445, 3306, 3389, 8080, 8443]
 
 store results = net.scan(ips[0], ports, 2) // 2 second timeout
-repeat port, status in results {
+repeat port in results {
+    store status = results[port]
     when status == "open" {
-        say "  [+] Port " + toString(port) + " is OPEN"
+        say "  [+] Port " + port + " is OPEN"
     }
 }
 
