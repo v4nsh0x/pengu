@@ -147,6 +147,38 @@ func findAsset(assets []githubAsset, name string) (*githubAsset, error) {
 }
 
 // downloadAsset downloads a URL to a temporary file and returns the temp file path.
+type ProgressWriter struct {
+	Total      int64
+	Downloaded int64
+}
+
+func (pw *ProgressWriter) Write(p []byte) (int, error) {
+	n := len(p)
+	pw.Downloaded += int64(n)
+	
+	if pw.Total > 0 {
+		percent := float64(pw.Downloaded) / float64(pw.Total) * 100
+		fmt.Printf("\r  [")
+		
+		completed := int(percent / 100.0 * 40)
+		for i := 0; i < completed; i++ {
+			fmt.Print("=")
+		}
+		if completed < 40 {
+			fmt.Print(">")
+		}
+		for i := completed + 1; i < 40; i++ {
+			fmt.Print(" ")
+		}
+		
+		fmt.Printf("] %.1f%% (%d / %d MB)", percent, pw.Downloaded/1024/1024, pw.Total/1024/1024)
+	} else {
+		fmt.Printf("\r  Downloaded %d MB...", pw.Downloaded/1024/1024)
+	}
+	
+	return n, nil
+}
+
 func downloadAsset(url string) (string, error) {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -164,7 +196,10 @@ func downloadAsset(url string) (string, error) {
 	}
 	defer tmpFile.Close()
 
-	_, err = io.Copy(tmpFile, resp.Body)
+	progress := &ProgressWriter{Total: resp.ContentLength}
+	_, err = io.Copy(tmpFile, io.TeeReader(resp.Body, progress))
+	fmt.Println() // Newline after progress bar
+	
 	if err != nil {
 		os.Remove(tmpFile.Name())
 		return "", fmt.Errorf("failed to write downloaded binary: %v", err)
