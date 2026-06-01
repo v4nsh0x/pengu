@@ -413,6 +413,7 @@ func (i *Interpreter) execUse(n *ast.UseStatement, env *runtime.Environment) (*r
 		"os":     createOsModule,
 		"crypto": createCryptoModule,
 		"net":    createNetModule,
+		"regex":  createRegexModule,
 	}
 
 	if creator, ok := nativeModules[n.Module]; ok {
