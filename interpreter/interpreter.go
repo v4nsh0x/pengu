@@ -16,9 +16,9 @@ import (
 
 // Interpreter evaluates Pengu AST nodes.
 type Interpreter struct {
-	Global    *runtime.Environment
-	basePath  string
-	imported  map[string]bool
+	Global   *runtime.Environment
+	basePath string
+	imported map[string]bool
 }
 
 // New creates a new Interpreter with built-in functions registered.
@@ -236,32 +236,32 @@ func (i *Interpreter) execFString(n *ast.FStringLiteral, env *runtime.Environmen
 	str := n.Value
 	re := regexp.MustCompile(`\{([^}]+)\}`)
 	matches := re.FindAllStringSubmatch(str, -1)
-	
+
 	for _, match := range matches {
 		fullMatch := match[0]
 		exprStr := match[1]
-		
+
 		// Lex and parse the expression snippet
 		l := lexer.New(exprStr)
 		tokens, err := l.Tokenize()
 		if err != nil {
 			return nil, fmt.Errorf("FString Lex Error:\n%v\nLine %d", err, n.Line)
 		}
-		
+
 		p := parser.New(tokens)
 		exprAst, err := p.ParseExpressionSnippet()
 		if err != nil {
 			return nil, fmt.Errorf("FString Parse Error:\n%v\nLine %d", err, n.Line)
 		}
-		
+
 		val, err := i.exec(exprAst, env)
 		if err != nil {
 			return nil, err
 		}
-		
+
 		str = strings.Replace(str, fullMatch, val.String(), 1)
 	}
-	
+
 	return runtime.NewString(str), nil
 }
 
@@ -429,9 +429,11 @@ func (i *Interpreter) execUse(n *ast.UseStatement, env *runtime.Environment) (*r
 
 	// Search paths in order:
 	// 1. Same directory as the current script
-	// 2. modules/ directory next to the pengu executable
+	// 2. modules/ directory next to the current script
+	// 3. modules/ directory next to the pengu executable
 	searchPaths := []string{
 		filepath.Join(i.basePath, moduleName),
+		filepath.Join(i.basePath, "modules", moduleName),
 	}
 
 	// Find the pengu executable's directory for built-in modules
@@ -474,9 +476,17 @@ func (i *Interpreter) execUse(n *ast.UseStatement, env *runtime.Environment) (*r
 	if err != nil {
 		return nil, fmt.Errorf("Error in module '%s':\n%s", n.Module, err)
 	}
-	_, err = i.execProgram(program, env)
+	moduleEnv := runtime.NewEnvironment(i.Global)
+	ret, err := i.execProgram(program, moduleEnv)
 	if err != nil {
 		return nil, fmt.Errorf("Error in module '%s':\n%s", n.Module, err)
+	}
+	
+	if ret != nil {
+		ret = ret.Unwrap()
+		if ret.Type != runtime.VAL_NULL {
+			env.Set(n.Module, ret)
+		}
 	}
 	return nil, nil
 }

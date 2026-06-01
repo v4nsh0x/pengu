@@ -1,0 +1,81 @@
+// color.pen
+// A pure Pengu external module for colorful terminal output using ANSI escape sequences.
+
+store RESET = "\e[0m"
+
+// Text Colors
+store RED = "\e[31m"
+store GREEN = "\e[32m"
+store YELLOW = "\e[33m"
+store BLUE = "\e[34m"
+store MAGENTA = "\e[35m"
+store CYAN = "\e[36m"
+store WHITE = "\e[37m"
+
+// Bright Text Colors
+store BRIGHT_RED = "\e[91m"
+store BRIGHT_GREEN = "\e[92m"
+store BRIGHT_YELLOW = "\e[93m"
+store BRIGHT_BLUE = "\e[94m"
+store BRIGHT_MAGENTA = "\e[95m"
+store BRIGHT_CYAN = "\e[96m"
+store BRIGHT_WHITE = "\e[97m"
+
+// Background Colors
+store BG_RED = "\e[41m"
+store BG_GREEN = "\e[42m"
+store BG_YELLOW = "\e[43m"
+store BG_BLUE = "\e[44m"
+store BG_MAGENTA = "\e[45m"
+store BG_CYAN = "\e[46m"
+store BG_WHITE = "\e[47m"
+
+// Styles
+store BOLD = "\e[1m"
+store UNDERLINE = "\e[4m"
+
+fn print(color, text) {
+    say color + text + RESET
+}
+
+fn info(text) {
+    say BOLD + CYAN + "[*] " + RESET + text
+}
+
+fn success(text) {
+    say BOLD + GREEN + "[+] " + RESET + text
+}
+
+fn error(text) {
+    say BOLD + RED + "[-] " + RESET + text
+}
+
+fn warn(text) {
+    say BOLD + YELLOW + "[!] " + RESET + text
+}
+
+fn custom(prefix, prefix_color, text) {
+    say prefix_color + prefix + RESET + " " + text
+}
+
+// Return the exported module object
+return {
+    "print": print,
+    "info": info,
+    "success": success,
+    "error": error,
+    "warn": warn,
+    "custom": custom,
+    
+    // Export raw variables in case users want to construct their own f-strings
+    "RED": RED,
+    "GREEN": GREEN,
+    "YELLOW": YELLOW,
+    "BLUE": BLUE,
+    "MAGENTA": MAGENTA,
+    "CYAN": CYAN,
+    "WHITE": WHITE,
+    "RESET": RESET,
+    "BOLD": BOLD,
+    "UNDERLINE": UNDERLINE
+}

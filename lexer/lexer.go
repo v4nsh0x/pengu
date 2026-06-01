@@ -277,6 +277,8 @@ func (l *Lexer) readString(isFString bool) (Token, error) {
 				sb.WriteRune('"')
 			case 'r':
 				sb.WriteRune('\r')
+			case 'e':
+				sb.WriteRune('\033') // ASCII escape character for ANSI colors
 			default:
 				sb.WriteRune('\\')
 				sb.WriteRune(escaped)
