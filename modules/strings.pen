@@ -58,3 +58,69 @@ fn reverse_str(s) {
 fn char_at(s, index) {
     return s[index]
 }
+
+fn capitalize_str(text) {
+    when len(text) == 0 {
+        return ""
+    }
+    // Assuming you have an upper() built-in or string method!
+    // Note: If you don't have .upper(), we'll need to do ASCII math
+    store first = text[0].upper() 
+    store rest = ""
+    repeat i in range(1, len(text)) {
+        rest = rest + text[i]
+    }
+    return first + rest
+}
+
+fn contains_str(text, search) {
+    when len(search) > len(text) {
+        return false
+    }
+    repeat i in range(len(text) - len(search) + 1) {
+        store found = true
+        repeat j in range(len(search)) {
+            when text[i + j] != search[j] {
+                found = false
+                break
+            }
+        }
+        when found {
+            return true
+        }
+    }
+    return false
+}
+
+fn count_str(text, search) {
+    store total = 0
+    when len(search) == 0 {
+        return 0
+    }
+    repeat i in range(len(text) - len(search) + 1) {
+        store found = true
+        repeat j in range(len(search)) {
+            when text[i + j] != search[j] {
+                found = false
+                break
+            }
+        }
+        when found {
+            total = total + 1
+        }
+    }
+    return total
+}
+
+// EXPORT ALL FUNCTIONS HERE!
+return {
+    "repeat_str": repeat_str,
+    "starts_with": starts_with,
+    "ends_with": ends_with,
+    "join": join,
+    "reverse_str": reverse_str,
+    "char_at": char_at,
+    "capitalize_str": capitalize_str,
+    "contains_str": contains_str,
+    "count_str": count_str
+}
