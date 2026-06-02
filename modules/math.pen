@@ -29,3 +29,11 @@ fn sum(arr) {
     }
     return total
 }
+
+return {
+    "square": square,
+    "cube": cube,
+    "max": max,
+    "min": min,
+    "sum": sum
+}
