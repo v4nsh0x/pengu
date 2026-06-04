@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pengu Programming Language</title>
-    <meta name="description" content="A fun, fast, and friendly programming language built in Go.">
+    <title>Pengu Programming Language | Fast, Fun, Scripting in Go</title>
+    <meta name="description" content="Pengu is a custom programming language built in Go. A fast, fun, and friendly scripting language designed for automation and clean syntax.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
@@ -373,6 +373,51 @@ repeat n in nums {
                                 <td>Checks if array contains value</td>
                                 <td>Boolean</td>
                             </tr>
+                            <tr>
+                                <td><code>.contains(val)</code></td>
+                                <td>Alias for includes</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>.index_of(val)</code></td>
+                                <td>Finds index of a value</td>
+                                <td>Integer</td>
+                            </tr>
+                            <tr>
+                                <td><code>.slice(start, end?)</code></td>
+                                <td>Extracts a portion of the array</td>
+                                <td>New array</td>
+                            </tr>
+                            <tr>
+                                <td><code>.every(fn)</code></td>
+                                <td>Checks if all elements pass test</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>.some(fn)</code></td>
+                                <td>Checks if any element passes test</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>.sort()</code></td>
+                                <td>Sorts array in-place</td>
+                                <td>Array</td>
+                            </tr>
+                            <tr>
+                                <td><code>.is_empty()</code></td>
+                                <td>Checks if array is empty</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>.first</code></td>
+                                <td>Gets first element (Property)</td>
+                                <td>Item or null</td>
+                            </tr>
+                            <tr>
+                                <td><code>.last</code></td>
+                                <td>Gets last element (Property)</td>
+                                <td>Item or null</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -385,6 +430,107 @@ say evens // [2, 4]
 
 store doubled = evens.map(fn(x) { return x * 2 })
 say doubled // [4, 8]</code></pre>
+                </div>
+            </section>
+
+            <!-- Strings -->
+            <section id="strings">
+                <h2>String Methods</h2>
+                <p>Strings in Pengu come with powerful native dot-methods for manipulation and searching.</p>
+                
+                <div class="table-responsive">
+                    <table class="docs-table">
+                        <thead>
+                            <tr>
+                                <th>Method</th>
+                                <th>Description</th>
+                                <th>Returns</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>.upper() / .lower()</code></td>
+                                <td>Changes string case</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>.capitalize()</code></td>
+                                <td>Capitalizes first letter</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>.contains(str)</code></td>
+                                <td>Checks for substring</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>.starts_with(str)</code></td>
+                                <td>Checks prefix</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>.ends_with(str)</code></td>
+                                <td>Checks suffix</td>
+                                <td>Boolean</td>
+                            </tr>
+                            <tr>
+                                <td><code>.index_of(str)</code></td>
+                                <td>Finds index of substring</td>
+                                <td>Integer</td>
+                            </tr>
+                            <tr>
+                                <td><code>.replace(old, new)</code></td>
+                                <td>Replaces all occurrences</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>.split(sep)</code></td>
+                                <td>Splits string by separator</td>
+                                <td>Array of strings</td>
+                            </tr>
+                            <tr>
+                                <td><code>.slice(start, end?)</code></td>
+                                <td>Extracts a portion</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>.trim()</code></td>
+                                <td>Removes whitespace</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>.repeat(n)</code></td>
+                                <td>Repeats the string</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>.pad_start(n, ch?)</code></td>
+                                <td>Pads the beginning</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>.pad_end(n, ch?)</code></td>
+                                <td>Pads the end</td>
+                                <td>String</td>
+                            </tr>
+                            <tr>
+                                <td><code>.chars()</code></td>
+                                <td>Splits into characters</td>
+                                <td>Array of strings</td>
+                            </tr>
+                            <tr>
+                                <td><code>.is_empty()</code></td>
+                                <td>Checks if empty</td>
+                                <td>Boolean</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="code-block">
+<pre><code class="language-javascript">store text = "  hello world  "
+say text.trim().upper().replace("WORLD", "PENGU") 
+// "HELLO PENGU"</code></pre>
                 </div>
             </section>
 
