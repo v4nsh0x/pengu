@@ -203,7 +203,8 @@ a:hover {
     left: 10%;
     width: 40vw;
     height: 40vw;
-    background: rgba(59, 130, 246, 0.15);
+    background: rgba(59, 130, 246, 0.25);
+    animation: float-glow 12s infinite alternate ease-in-out;
 }
 
 .glow-2 {
@@ -211,13 +212,78 @@ a:hover {
     right: 10%;
     width: 30vw;
     height: 30vw;
-    background: rgba(139, 92, 246, 0.15);
-    animation-delay: -5s;
+    background: rgba(236, 72, 153, 0.25); /* Pinkish glow for fun */
+    animation: float-glow 15s infinite alternate-reverse ease-in-out;
 }
 
-@keyframes float {
-    0% { transform: translate(0, 0) scale(1); }
-    100% { transform: translate(30px, 50px) scale(1.1); }
+.glow-3 {
+    top: 30%;
+    left: 40%;
+    width: 25vw;
+    height: 25vw;
+    background: rgba(16, 185, 129, 0.2); /* Emerald glow */
+    animation: float-glow 10s infinite alternate ease-in-out;
+}
+
+@keyframes float-glow {
+    0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+    50% { transform: translate(40px, 60px) scale(1.2) rotate(45deg); }
+    100% { transform: translate(-20px, 30px) scale(0.9) rotate(-20deg); }
+}
+
+/* Floating BG Items (Penguins and stuff) */
+.floating-bg-item {
+    position: absolute;
+    font-size: 3rem;
+    opacity: 0.15;
+    z-index: -1;
+    filter: blur(2px);
+    pointer-events: none;
+    animation: float-item 20s infinite linear;
+}
+
+.item-1 { top: 20%; left: 10%; font-size: 5rem; animation-duration: 25s; }
+.item-2 { top: 70%; left: 80%; font-size: 4rem; animation-duration: 18s; animation-direction: reverse; }
+.item-3 { top: 40%; left: 85%; font-size: 3rem; animation-duration: 22s; }
+.item-4 { top: 80%; left: 20%; font-size: 6rem; animation-duration: 30s; }
+
+@keyframes float-item {
+    0% { transform: translateY(0) rotate(0deg) scale(1); }
+    50% { transform: translateY(-100px) rotate(180deg) scale(1.1); }
+    100% { transform: translateY(0) rotate(360deg) scale(1); }
+}
+
+/* Fun text elements */
+.fun-emoji {
+    display: inline-block;
+}
+
+.bounce {
+    animation: bounce 2s infinite ease-in-out;
+}
+
+.float {
+    animation: hover-float 3s infinite ease-in-out;
+}
+
+@keyframes bounce {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50% { transform: translateY(-10px) scale(1.1); }
+}
+
+@keyframes hover-float {
+    0%, 100% { transform: translateY(0) rotate(-5deg); }
+    50% { transform: translateY(-8px) rotate(5deg); }
+}
+
+.pulse-badge {
+    animation: pulse-border 2s infinite;
+}
+
+@keyframes pulse-border {
+    0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
 }
 
 .hero-content {
@@ -271,14 +337,33 @@ a:hover {
 }
 
 .btn-primary {
-    background: var(--accent-gradient);
+    background: linear-gradient(45deg, #ff512f, #dd2476);
     color: white;
-    box-shadow: 0 4px 14px 0 var(--accent-glow);
+    border: none;
+    box-shadow: 0 4px 15px rgba(221, 36, 118, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-primary::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(45deg) translateY(100%);
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-primary:hover::after {
+    transform: rotate(45deg) translateY(-100%);
 }
 
 .btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6);
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(221, 36, 118, 0.6);
     color: white;
 }
 
