@@ -1,0 +1,72 @@
+// strings_demo.pen
+// Showcases all built-in string methods in Pengu
+// No imports needed — these are all native dot-methods!
+
+say "============================="
+say "  Pengu String Methods Demo"
+say "============================="
+
+store name = "pengu lang"
+
+// --- Case Methods ---
+say ""
+say "-- Case --"
+say name.upper()          // PENGU LANG
+say name.lower()          // pengu lang
+say name.capitalize()     // Pengu lang
+
+// --- Search Methods ---
+say ""
+say "-- Search --"
+say name.contains("lang")       // true
+say name.contains("python")     // false
+say name.starts_with("pengu")   // true
+say name.ends_with("lang")      // true
+say name.index_of("lang")       // 6
+say name.index_of("nope")       // -1
+say name.count("n")             // 2
+
+// --- Transform Methods ---
+say ""
+say "-- Transform --"
+say name.replace("lang", "rocks")    // pengu rocks
+say name.reverse()                    // gnal ugnep
+say name.repeat(3)                    // pengu langpengu langpengu lang
+say "  hello  ".trim()                // hello
+
+// --- Slice and Split ---
+say ""
+say "-- Slice & Split --"
+say name.slice(0, 5)             // pengu
+say name.slice(-4)               // lang
+say name.split(" ")              // ["pengu", "lang"]
+say name.chars()                 // ["p", "e", "n", "g", "u", " ", "l", "a", "n", "g"]
+
+// --- Padding ---
+say ""
+say "-- Padding --"
+say "42".pad_start(6, "0")       // 000042
+say "hi".pad_end(6, "!")         // hi!!!!
+say "7".pad_start(3)             //   7  (padded with spaces)
+
+// --- Utility ---
+say ""
+say "-- Utility --"
+say name.length                  // 10
+say name.is_empty()              // false
+say "".is_empty()                // true
+
+// --- Chaining ---
+say ""
+say "-- Chaining --"
+say "hello world".split(" ").join("-")       // hello-world
+say "hello".upper().reverse()                 // OLLEH
+say "  PENGU  ".trim().lower().capitalize()   // Pengu
+
+// --- Practical Example: Format a username ---
+say ""
+say "-- Practical: Username Formatter --"
+store raw = "  JoHn_DoE  "
+store clean = raw.trim().lower().replace("_", " ").capitalize()
+say f"Raw:   '{raw}'"
+say f"Clean: '{clean}'"

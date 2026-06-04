@@ -357,6 +357,19 @@ func isConditionExpression(node ast.Node) bool {
 	return false
 }
 
+// isKeywordToken checks if a token type is a keyword that can also be used as a property name.
+func isKeywordToken(t lexer.TokenType) bool {
+	switch t {
+	case lexer.TOKEN_STORE, lexer.TOKEN_SAY, lexer.TOKEN_FN, lexer.TOKEN_RETURN,
+		lexer.TOKEN_WHEN, lexer.TOKEN_OTHERWISE, lexer.TOKEN_REPEAT, lexer.TOKEN_IN,
+		lexer.TOKEN_USE, lexer.TOKEN_BREAK, lexer.TOKEN_CONTINUE,
+		lexer.TOKEN_TRY, lexer.TOKEN_CATCH,
+		lexer.TOKEN_TRUE, lexer.TOKEN_FALSE, lexer.TOKEN_NULL:
+		return true
+	}
+	return false
+}
+
 func (p *Parser) parseReturnStatement() (ast.Node, error) {
 	tok := p.advance() // consume 'return'
 	line := tok.Line
@@ -768,8 +781,12 @@ func (p *Parser) parsePostfix() (ast.Node, error) {
 		case lexer.TOKEN_DOT:
 			// Member access
 			p.advance() // consume '.'
-			propTok, err := p.expect(lexer.TOKEN_IDENT)
-			if err != nil {
+			propTok := p.peek()
+			// Accept identifiers AND keywords as property names after '.'
+			// This allows methods like .repeat(), .break, .return, etc.
+			if propTok.Type == lexer.TOKEN_IDENT || isKeywordToken(propTok.Type) {
+				p.advance()
+			} else {
 				return nil, fmt.Errorf("Syntax Error:\nExpected property name after '.'\nLine %d", p.current.Line)
 			}
 			expr = &ast.MemberExpression{
