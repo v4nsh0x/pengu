@@ -1,8 +1,8 @@
-# 🐧 Pengu
+# 🐧 Pengu Programming Language
 
-**A fun, fast, and friendly programming language.**
+**A fun, fast, and friendly scripting language.**
 
-Pengu is a lightweight, expressive scripting language built in Go. It's designed to feel simple like Python, lightweight like Lua, and clean like Go — while being playful and beginner-friendly.
+Pengu is a lightweight, expressive, and custom programming language built in Go (Golang). If you are looking for the Pengu language, you've found it! It is designed to feel simple like Python, lightweight like Lua, and clean like Go — while being playful, fast, and beginner-friendly.
 
 ```pen
 store name = "world"
