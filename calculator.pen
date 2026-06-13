@@ -1,0 +1,88 @@
+fn add(a, b) {
+    return a + b
+}
+
+fn sub(a, b) {
+    return a - b
+}
+
+fn multiply(a, b) {
+    return a * b
+}
+
+fn divide(a, b) {
+
+    when b == 0 {
+        say "Cannot divide by zero."
+        return 0
+    }
+
+    return a / b
+}
+
+store running = true
+
+say "=========================="
+say "     PENGU CALCULATOR"
+say "=========================="
+
+repeat running == true {
+
+    say ""
+    say "Choose Operation"
+    say "+  -> Addition"
+    say "-  -> Subtraction"
+    say "*  -> Multiplication"
+    say "/  -> Division"
+    say "exit -> Quit"
+
+    store operation = ask("Operation: ")
+
+    when operation == "exit" {
+
+        say ""
+        say "Goodbye from Pengu 🐧"
+
+        running = false
+
+    } otherwise {
+
+        store num1 = toInt(ask("Enter Number 1: "))
+        store num2 = toInt(ask("Enter Number 2: "))
+
+        when operation == "+" {
+
+            say ""
+            say "Answer: " + add(num1, num2)
+
+        } otherwise {
+
+            when operation == "-" {
+
+                say ""
+                say "Answer: " + sub(num1, num2)
+
+            } otherwise {
+
+                when operation == "*" {
+
+                    say ""
+                    say "Answer: " + multiply(num1, num2)
+
+                } otherwise {
+
+                    when operation == "/" {
+
+                        say ""
+                        say "Answer: " + divide(num1, num2)
+
+                    } otherwise {
+
+                        say ""
+                        say "Invalid operation."
+                    }
+                }
+            }
+        }
+    }
+}

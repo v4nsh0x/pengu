@@ -3,6 +3,7 @@ package runtime
 import (
 	"fmt"
 	"strings"
+	"sync"
 
 	"github.com/v4nsh0x/pengu/ast"
 )
@@ -22,6 +23,7 @@ const (
 	VAL_RETURN    // wrapper for return values
 	VAL_BREAK     // signal for break
 	VAL_CONTINUE  // signal for continue
+	VAL_FUTURE    // concurrent future (from spawn)
 )
 
 // Value represents a runtime value in Pengu.
@@ -34,6 +36,7 @@ type Value struct {
 	Object   *OrderedMap
 	Func     *FunctionValue
 	Builtin  BuiltinFunc
+	Future   *Future
 	IsInt    bool // whether the number is an integer
 }
 
@@ -47,6 +50,29 @@ type FunctionValue struct {
 
 // BuiltinFunc is the signature for built-in functions.
 type BuiltinFunc func(args []*Value) (*Value, error)
+
+// Future holds the state for a spawned concurrent task.
+type Future struct {
+	ch     chan struct{} // closed when the result is ready
+	result *Value
+	err    error
+	once   sync.Once
+}
+
+// Resolve is called by the goroutine to deliver the result.
+func (f *Future) Resolve(val *Value, err error) {
+	f.once.Do(func() {
+		f.result = val
+		f.err = err
+		close(f.ch)
+	})
+}
+
+// Await blocks until the future is resolved and returns the result.
+func (f *Future) Await() (*Value, error) {
+	<-f.ch
+	return f.result, f.err
+}
 
 // OrderedMap preserves insertion order for object keys.
 type OrderedMap struct {
@@ -146,6 +172,14 @@ func NewContinue() *Value {
 	return &Value{Type: VAL_CONTINUE}
 }
 
+// NewFuture creates a future value wrapping a channel-based result.
+func NewFuture() (*Value, *Future) {
+	f := &Future{
+		ch: make(chan struct{}),
+	}
+	return &Value{Type: VAL_FUTURE, Future: f}, f
+}
+
 // Unwrap extracts the inner value from a return wrapper.
 func (v *Value) Unwrap() *Value {
 	if v.Type == VAL_RETURN && len(v.Array) > 0 {
@@ -196,6 +230,8 @@ func (v *Value) TypeName() string {
 		return "function"
 	case VAL_BUILTIN:
 		return "builtin"
+	case VAL_FUTURE:
+		return "future"
 	default:
 		return "unknown"
 	}
@@ -244,6 +280,8 @@ func (v *Value) String() string {
 		return fmt.Sprintf("<fn %s>", v.Func.Name)
 	case VAL_BUILTIN:
 		return "<builtin>"
+	case VAL_FUTURE:
+		return "<future>"
 	default:
 		return "<unknown>"
 	}

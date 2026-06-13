@@ -185,6 +185,18 @@ type (
 		Property string
 		Line     int
 	}
+
+	// SpawnExpression represents: spawn expr
+	SpawnExpression struct {
+		Value Node
+		Line  int
+	}
+
+	// AwaitExpression represents: await expr
+	AwaitExpression struct {
+		Value Node
+		Line  int
+	}
 )
 
 // nodeType implementations
@@ -213,3 +225,5 @@ func (u *UnaryExpression) nodeType() string      { return "UnaryExpression" }
 func (c *CallExpression) nodeType() string       { return "CallExpression" }
 func (i *IndexExpression) nodeType() string      { return "IndexExpression" }
 func (m *MemberExpression) nodeType() string     { return "MemberExpression" }
+func (s *SpawnExpression) nodeType() string      { return "SpawnExpression" }
+func (a *AwaitExpression) nodeType() string      { return "AwaitExpression" }

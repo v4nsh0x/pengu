@@ -45,7 +45,7 @@
             <div class="floating-bg-item item-4">🐧</div>
         </div>
         <div class="hero-content">
-            <div class="badge pulse-badge">v0.5.0 Released</div>
+            <div class="badge pulse-badge">v0.6.0 Released</div>
             <h1 class="title">Code at the speed of <span class="gradient-text">thought</span>. <span class="fun-emoji bounce">🚀</span></h1>
             <p class="subtitle">A fun, fast, and friendly programming language built in Go. Designed for scripting, automation, and cybersecurity tooling. <span class="fun-emoji float">❄️</span></p>
             
@@ -96,6 +96,7 @@ say nums.map(fn(x) { return x * 2 })</code></pre>
                     <li><a href="#types">Data Types</a></li>
                     <li><a href="#functions">Functions</a></li>
                     <li><a href="#control-flow">Control Flow</a></li>
+                    <li><a href="#concurrency">Concurrency</a></li>
                 </ul>
 
                 <h3>Standard Library</h3>
@@ -325,6 +326,40 @@ store nums = [1, 2, 3]
 repeat n in nums {
     say n
 }</code></pre>
+                </div>
+            </section>
+
+            <!-- Concurrency -->
+            <section id="concurrency">
+                <h2>Concurrency</h2>
+                <div class="badge-module">Native Built-in</div>
+                <p>Pengu exposes Go's goroutines through a simple <code>spawn</code> and <code>await</code> syntax. Launch thousands of tasks concurrently with zero complexity.</p>
+                
+                <h3>Spawn & Await</h3>
+                <p>Use <code>spawn</code> to run any expression in the background. It returns a <strong>future</strong> immediately. Use <code>await</code> to block until a future resolves.</p>
+                
+                <div class="code-block">
+<pre><code class="language-javascript">store task = spawn fn() {
+    store total = 0
+    repeat i in range(1000) { total = total + 1 }
+    return total
+}
+
+say "Task is running in the background..."
+store result = await task
+say result  // 1000</code></pre>
+                </div>
+
+                <h3>Parallel Execution</h3>
+                <p>Spawn multiple tasks and wait for all of them at once using <code>await_all</code>:</p>
+                
+                <div class="code-block">
+<pre><code class="language-javascript">store t1 = spawn http.get("https://api.github.com")
+store t2 = spawn http.get("https://api.github.com/users")
+
+store results = await_all([t1, t2])
+say results[0].status  // 200
+say results[1].status  // 200</code></pre>
                 </div>
             </section>
 

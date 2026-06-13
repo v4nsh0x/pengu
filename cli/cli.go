@@ -16,7 +16,7 @@ import (
 	"github.com/v4nsh0x/pengu/parser"
 )
 
-const version = "0.5.0"
+const version = "0.6.0"
 
 const logo = `
   🐧 Pengu v%s

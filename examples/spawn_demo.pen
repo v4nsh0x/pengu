@@ -1,0 +1,57 @@
+// spawn_demo.pen
+// Showcases Pengu's concurrency with spawn and await
+// Powered by Go's goroutines under the hood!
+
+say "==============================="
+say "  Pengu Concurrency Demo"
+say "==============================="
+
+// --- Basic: Spawn a task and await its result ---
+say ""
+say "-- Spawn & Await --"
+
+store task = spawn fn() {
+    store total = 0
+    repeat i in range(100) {
+        total = total + i
+    }
+    return total
+}
+
+say "Task is running in the background..."
+store result = await task
+say f"Sum of 0..99 = {result}"
+
+// --- Parallel Tasks ---
+say ""
+say "-- Parallel Execution --"
+
+store a = spawn fn() { return "alpha" }
+store b = spawn fn() { return "bravo" }
+store c = spawn fn() { return "charlie" }
+
+say "3 tasks launched concurrently!"
+store all = await_all([a, b, c])
+say f"Results: {all}"
+
+// --- Spawn simple expressions ---
+say ""
+say "-- Spawn Expressions --"
+
+store math_task = spawn 2 * 21
+say f"2 * 21 = {await math_task}"
+
+store str_task = spawn "hello".upper()
+say f"upper = {await str_task}"
+
+// --- Type checking ---
+say ""
+say "-- Future Type --"
+
+store f = spawn fn() { return 42 }
+say f"Before await: type = {type(f)}"
+store v = await f
+say f"After await:  type = {type(v)}, value = {v}"
+
+say ""
+say "Done! 🐧"

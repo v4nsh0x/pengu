@@ -237,4 +237,40 @@ func (i *Interpreter) registerBuiltins() {
 		isInt := args[0].IsInt && args[1].IsInt && args[1].Number >= 0
 		return runtime.NewNumber(result, isInt), nil
 	}))
+
+	// await_all - waits for an array of futures to all resolve
+	i.Global.Set("await_all", runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
+		if len(args) != 1 || args[0].Type != runtime.VAL_ARRAY {
+			return nil, fmt.Errorf("await_all() expects an array of futures")
+		}
+		futures := args[0].Array
+		results := make([]*runtime.Value, len(futures))
+
+		// Await all futures concurrently using goroutines
+		type indexedResult struct {
+			idx int
+			val *runtime.Value
+			err error
+		}
+		ch := make(chan indexedResult, len(futures))
+		for idx, f := range futures {
+			if f.Type != runtime.VAL_FUTURE {
+				return nil, fmt.Errorf("await_all() expects all elements to be futures, got %s at index %d", f.TypeName(), idx)
+			}
+			go func(i int, fut *runtime.Value) {
+				val, err := fut.Future.Await()
+				ch <- indexedResult{i, val, err}
+			}(idx, f)
+		}
+
+		for range futures {
+			res := <-ch
+			if res.err != nil {
+				return nil, fmt.Errorf("Runtime Error (in spawned task #%d):\n%s", res.idx, res.err)
+			}
+			results[res.idx] = res.val
+		}
+
+		return runtime.NewArray(results), nil
+	}))
 }

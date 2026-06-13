@@ -32,6 +32,8 @@ const (
 	TOKEN_CONTINUE  // continue
 	TOKEN_TRY       // try
 	TOKEN_CATCH     // catch
+	TOKEN_SPAWN     // spawn
+	TOKEN_AWAIT     // await
 
 	// Operators
 	TOKEN_PLUS     // +
@@ -89,6 +91,8 @@ var keywords = map[string]TokenType{
 	"continue":  TOKEN_CONTINUE,
 	"try":       TOKEN_TRY,
 	"catch":     TOKEN_CATCH,
+	"spawn":     TOKEN_SPAWN,
+	"await":     TOKEN_AWAIT,
 }
 
 // LookupIdent checks if an identifier is a keyword and returns the appropriate token type.
@@ -148,6 +152,10 @@ func (t TokenType) String() string {
 		return "TRY"
 	case TOKEN_CATCH:
 		return "CATCH"
+	case TOKEN_SPAWN:
+		return "SPAWN"
+	case TOKEN_AWAIT:
+		return "AWAIT"
 	case TOKEN_PLUS:
 		return "+"
 	case TOKEN_MINUS:

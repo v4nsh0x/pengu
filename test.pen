@@ -1,0 +1,4 @@
+say "hello"
+store names = ["vansh", "mishika", "pooja"]
+names.push("akhilesh")
+say names

@@ -1,0 +1,31 @@
+// math.pen - a simple math utility module
+
+fn square(x) {
+    return x * x
+}
+
+fn cube(x) {
+    return x * x * x
+}
+
+fn max(a, b) {
+    when a > b {
+        return a
+    }
+    return b
+}
+
+fn min(a, b) {
+    when a < b {
+        return a
+    }
+    return b
+}
+
+fn sum(arr) {
+    store total = 0
+    repeat item in arr {
+        total = total + item
+    }
+    return total
+}

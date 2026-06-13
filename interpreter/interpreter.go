@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
+	"sync"
 
 	"github.com/v4nsh0x/pengu/ast"
 	"github.com/v4nsh0x/pengu/lexer"
@@ -128,6 +129,10 @@ func (i *Interpreter) exec(node ast.Node, env *runtime.Environment) (*runtime.Va
 		return i.execArray(n, env)
 	case *ast.ObjectLiteral:
 		return i.execObject(n, env)
+	case *ast.SpawnExpression:
+		return i.execSpawn(n, env)
+	case *ast.AwaitExpression:
+		return i.execAwait(n, env)
 	default:
 		return runtime.NewNull(), nil
 	}
@@ -1276,3 +1281,72 @@ func (i *Interpreter) invokeCallback(callback *runtime.Value, args []*runtime.Va
 		return nil, fmt.Errorf("Runtime Error:\nCallback must be a function, got %s\nLine %d", callback.TypeName(), line)
 	}
 }
+
+// cloneEnv creates a shallow copy of an environment chain (safe for goroutine use).
+func cloneEnv(env *runtime.Environment) *runtime.Environment {
+	if env == nil {
+		return nil
+	}
+	newEnv := runtime.NewEnvironment(cloneEnv(env.Parent()))
+	for _, name := range env.Names() {
+		val, _ := env.GetLocal(name)
+		newEnv.Set(name, val)
+	}
+	return newEnv
+}
+
+// execSpawn evaluates: spawn <expr>
+// Launches the expression in a goroutine and returns a Future immediately.
+func (i *Interpreter) execSpawn(n *ast.SpawnExpression, env *runtime.Environment) (*runtime.Value, error) {
+	futureVal, future := runtime.NewFuture()
+
+	// Snapshot the environment so the goroutine has its own copy
+	envSnapshot := cloneEnv(env)
+
+	// If the expression is a call to an anonymous function with no args,
+	// e.g. spawn fn() { ... }, we handle it cleanly
+	go func() {
+		result, err := i.exec(n.Value, envSnapshot)
+		if err != nil {
+			future.Resolve(nil, err)
+			return
+		}
+		// If the result is a function (spawn fn() { ... }), call it
+		if result.Type == runtime.VAL_FUNCTION {
+			res, callErr := i.callFunction(result.Func, []*runtime.Value{}, n.Line)
+			if callErr != nil {
+				future.Resolve(nil, callErr)
+				return
+			}
+			result = res
+		}
+		// Unwrap return wrappers
+		result = result.Unwrap()
+		future.Resolve(result, nil)
+	}()
+
+	return futureVal, nil
+}
+
+// execAwait evaluates: await <expr>
+// Blocks until the Future is resolved and returns the result.
+func (i *Interpreter) execAwait(n *ast.AwaitExpression, env *runtime.Environment) (*runtime.Value, error) {
+	val, err := i.exec(n.Value, env)
+	if err != nil {
+		return nil, err
+	}
+
+	if val.Type != runtime.VAL_FUTURE {
+		return nil, fmt.Errorf("Runtime Error:\nawait expects a future (from spawn), got %s\nLine %d", val.TypeName(), n.Line)
+	}
+
+	result, awaitErr := val.Future.Await()
+	if awaitErr != nil {
+		return nil, fmt.Errorf("Runtime Error (in spawned task):\n%s\nLine %d", awaitErr, n.Line)
+	}
+
+	return result, nil
+}
+
+// Suppress unused import warning for sync
+var _ = sync.Once{}

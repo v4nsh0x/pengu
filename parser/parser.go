@@ -363,7 +363,7 @@ func isKeywordToken(t lexer.TokenType) bool {
 	case lexer.TOKEN_STORE, lexer.TOKEN_SAY, lexer.TOKEN_FN, lexer.TOKEN_RETURN,
 		lexer.TOKEN_WHEN, lexer.TOKEN_OTHERWISE, lexer.TOKEN_REPEAT, lexer.TOKEN_IN,
 		lexer.TOKEN_USE, lexer.TOKEN_BREAK, lexer.TOKEN_CONTINUE,
-		lexer.TOKEN_TRY, lexer.TOKEN_CATCH,
+		lexer.TOKEN_TRY, lexer.TOKEN_CATCH, lexer.TOKEN_SPAWN, lexer.TOKEN_AWAIT,
 		lexer.TOKEN_TRUE, lexer.TOKEN_FALSE, lexer.TOKEN_NULL:
 		return true
 	}
@@ -869,6 +869,24 @@ func (p *Parser) parsePrimary() (ast.Node, error) {
 	case lexer.TOKEN_FN:
 		// Anonymous function (lambda): fn(params) { body }
 		return p.parseAnonymousFunction()
+
+	case lexer.TOKEN_SPAWN:
+		// spawn <expr> — launches a concurrent task
+		p.advance()
+		expr, err := p.parseExpression()
+		if err != nil {
+			return nil, err
+		}
+		return &ast.SpawnExpression{Value: expr, Line: tok.Line}, nil
+
+	case lexer.TOKEN_AWAIT:
+		// await <expr> — waits for a future to resolve
+		p.advance()
+		expr, err := p.parseExpression()
+		if err != nil {
+			return nil, err
+		}
+		return &ast.AwaitExpression{Value: expr, Line: tok.Line}, nil
 
 	default:
 		return nil, fmt.Errorf("Syntax Error:\nUnexpected token '%s'\nLine %d, Column %d",

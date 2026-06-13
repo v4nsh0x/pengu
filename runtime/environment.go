@@ -50,3 +50,23 @@ func (e *Environment) Has(name string) bool {
 	_, ok := e.store[name]
 	return ok
 }
+
+// Parent returns the parent environment (or nil if this is the root).
+func (e *Environment) Parent() *Environment {
+	return e.parent
+}
+
+// Names returns all variable names in the current scope (not parents).
+func (e *Environment) Names() []string {
+	names := make([]string, 0, len(e.store))
+	for k := range e.store {
+		names = append(names, k)
+	}
+	return names
+}
+
+// GetLocal looks up a variable only in the current scope (not parents).
+func (e *Environment) GetLocal(name string) (*Value, bool) {
+	val, ok := e.store[name]
+	return val, ok
+}

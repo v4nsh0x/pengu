@@ -52,6 +52,7 @@ Pengu is the result: a language that is incredibly easy to write, but runs at ne
 - [String Methods](#string-methods)
 - [Array Methods](#array-methods)
 - [Error Handling](#error-handling)
+- [Concurrency](#concurrency)
 - [Architecture](#architecture)
 - [Examples](#examples)
 - [Vision & Future](#vision--future-1)
@@ -920,6 +921,75 @@ say random(1, 6)  // 3 (varies, like a dice roll)
 ```
 
 ---
+
+## Concurrency
+
+Pengu exposes Go's goroutines through a simple `spawn` and `await` syntax. Launch thousands of tasks concurrently with zero complexity.
+
+### Spawn a Task
+
+Use `spawn` to run any expression in the background. It returns a **future** immediately.
+
+```pen
+store task = spawn fn() {
+    // This runs concurrently in the background
+    store total = 0
+    repeat i in range(1000000) {
+        total = total + 1
+    }
+    return total
+}
+
+say "This prints immediately while the task runs!"
+```
+
+### Await a Result
+
+Use `await` to block until a future resolves and get the result.
+
+```pen
+store result = await task
+say result  // 1000000
+```
+
+### Spawn Simple Expressions
+
+You don't need a full function — any expression works:
+
+```pen
+store t = spawn 2 * 21
+say await t  // 42
+
+store t2 = spawn "hello".upper()
+say await t2  // "HELLO"
+```
+
+### Parallel Execution with `await_all`
+
+Spawn multiple tasks and wait for all of them at once:
+
+```pen
+store t1 = spawn fn() { return "alpha" }
+store t2 = spawn fn() { return "bravo" }
+store t3 = spawn fn() { return "charlie" }
+
+store results = await_all([t1, t2, t3])
+say results  // ["alpha", "bravo", "charlie"]
+```
+
+> **Under the Hood:** Each `spawn` launches a real Go goroutine. This means Pengu can handle thousands of concurrent tasks with minimal overhead, making it ideal for network scanning, API calls, and automation.
+
+### Future Type
+
+A spawned task returns a `future` value:
+
+```pen
+store f = spawn fn() { return 42 }
+say type(f)      // "future"
+
+store v = await f
+say type(v)      // "int"
+```
 
 ## String Methods
 
