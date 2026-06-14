@@ -1102,10 +1102,10 @@ func (i *Interpreter) execMember(n *ast.MemberExpression, env *runtime.Environme
 				}
 				return runtime.NewBool(strings.HasSuffix(obj.Str, args[0].String())), nil
 			}), nil
-		case "repeat":
+		case "repeat_str":
 			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
 				if len(args) == 0 || args[0].Type != runtime.VAL_NUMBER {
-					return nil, fmt.Errorf("repeat() expects a number argument")
+					return nil, fmt.Errorf("repeat_str() expects a number argument")
 				}
 				return runtime.NewString(strings.Repeat(obj.Str, int(args[0].Number))), nil
 			}), nil
