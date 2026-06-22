@@ -1,0 +1,7 @@
+use validator
+
+say validator.is_email("krishna@gmail.com")
+say validator.is_email("hello")
+
+say validator.is_username("krishna_123")
+say validator.is_ipv4("192.168.1.1")
