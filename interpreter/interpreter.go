@@ -7,7 +7,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"strings"
-	"sync"
 
 	"github.com/v4nsh0x/pengu/ast"
 	"github.com/v4nsh0x/pengu/lexer"
@@ -129,10 +128,6 @@ func (i *Interpreter) exec(node ast.Node, env *runtime.Environment) (*runtime.Va
 		return i.execArray(n, env)
 	case *ast.ObjectLiteral:
 		return i.execObject(n, env)
-	case *ast.SpawnExpression:
-		return i.execSpawn(n, env)
-	case *ast.AwaitExpression:
-		return i.execAwait(n, env)
 	default:
 		return runtime.NewNull(), nil
 	}
@@ -486,7 +481,7 @@ func (i *Interpreter) execUse(n *ast.UseStatement, env *runtime.Environment) (*r
 	if err != nil {
 		return nil, fmt.Errorf("Error in module '%s':\n%s", n.Module, err)
 	}
-	
+
 	if ret != nil {
 		ret = ret.Unwrap()
 		if ret.Type != runtime.VAL_NULL {
@@ -733,18 +728,6 @@ func (i *Interpreter) execMember(n *ast.MemberExpression, env *runtime.Environme
 	if obj.Type == runtime.VAL_ARRAY && n.Property == "length" {
 		return runtime.NewNumber(float64(len(obj.Array)), true), nil
 	}
-	if obj.Type == runtime.VAL_ARRAY && n.Property == "first" {
-		if len(obj.Array) == 0 {
-			return runtime.NewNull(), nil
-		}
-		return obj.Array[0], nil
-	}
-	if obj.Type == runtime.VAL_ARRAY && n.Property == "last" {
-		if len(obj.Array) == 0 {
-			return runtime.NewNull(), nil
-		}
-		return obj.Array[len(obj.Array)-1], nil
-	}
 	if obj.Type == runtime.VAL_STRING && n.Property == "length" {
 		return runtime.NewNumber(float64(len([]rune(obj.Str))), true), nil
 	}
@@ -936,121 +919,6 @@ func (i *Interpreter) execMember(n *ast.MemberExpression, env *runtime.Environme
 				}
 				return runtime.NewString(strings.Join(parts, sep)), nil
 			}), nil
-		case "slice":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) < 1 || args[0].Type != runtime.VAL_NUMBER {
-					return nil, fmt.Errorf("slice() expects at least 1 number argument")
-				}
-				start := int(args[0].Number)
-				end := len(obj.Array)
-				if len(args) >= 2 && args[1].Type == runtime.VAL_NUMBER {
-					end = int(args[1].Number)
-				}
-				if start < 0 { start = len(obj.Array) + start }
-				if end < 0 { end = len(obj.Array) + end }
-				if start < 0 { start = 0 }
-				if end > len(obj.Array) { end = len(obj.Array) }
-				if start >= end {
-					return runtime.NewArray([]*runtime.Value{}), nil
-				}
-				newArr := make([]*runtime.Value, end-start)
-				copy(newArr, obj.Array[start:end])
-				return runtime.NewArray(newArr), nil
-			}), nil
-		case "contains":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) != 1 {
-					return nil, fmt.Errorf("contains() expects 1 argument")
-				}
-				for _, elem := range obj.Array {
-					if valuesEqual(elem, args[0]) {
-						return runtime.NewBool(true), nil
-					}
-				}
-				return runtime.NewBool(false), nil
-			}), nil
-		case "index_of":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) != 1 {
-					return nil, fmt.Errorf("index_of() expects 1 argument")
-				}
-				for idx, elem := range obj.Array {
-					if valuesEqual(elem, args[0]) {
-						return runtime.NewNumber(float64(idx), true), nil
-					}
-				}
-				return runtime.NewNumber(-1, true), nil
-			}), nil
-		case "every":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) != 1 {
-					return nil, fmt.Errorf("every() expects 1 callback argument")
-				}
-				callback := args[0]
-				for idx, elem := range obj.Array {
-					var cbArgs []*runtime.Value
-					if callback.Type == runtime.VAL_FUNCTION && len(callback.Func.Params) >= 2 {
-						cbArgs = []*runtime.Value{elem, runtime.NewNumber(float64(idx), true)}
-					} else {
-						cbArgs = []*runtime.Value{elem}
-					}
-					val, err := i.invokeCallback(callback, cbArgs, n.Line)
-					if err != nil { return nil, err }
-					if !val.IsTruthy() { return runtime.NewBool(false), nil }
-				}
-				return runtime.NewBool(true), nil
-			}), nil
-		case "some":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) != 1 {
-					return nil, fmt.Errorf("some() expects 1 callback argument")
-				}
-				callback := args[0]
-				for idx, elem := range obj.Array {
-					var cbArgs []*runtime.Value
-					if callback.Type == runtime.VAL_FUNCTION && len(callback.Func.Params) >= 2 {
-						cbArgs = []*runtime.Value{elem, runtime.NewNumber(float64(idx), true)}
-					} else {
-						cbArgs = []*runtime.Value{elem}
-					}
-					val, err := i.invokeCallback(callback, cbArgs, n.Line)
-					if err != nil { return nil, err }
-					if val.IsTruthy() { return runtime.NewBool(true), nil }
-				}
-				return runtime.NewBool(false), nil
-			}), nil
-		case "sort":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				sorted := make([]*runtime.Value, len(obj.Array))
-				copy(sorted, obj.Array)
-				for x := 1; x < len(sorted); x++ {
-					key := sorted[x]
-					y := x - 1
-					for y >= 0 {
-						shouldSwap := false
-						if len(args) > 0 {
-							val, err := i.invokeCallback(args[0], []*runtime.Value{sorted[y], key}, n.Line)
-							if err != nil { return nil, err }
-							shouldSwap = val.Number > 0
-						} else {
-							if sorted[y].Type == runtime.VAL_NUMBER && key.Type == runtime.VAL_NUMBER {
-								shouldSwap = sorted[y].Number > key.Number
-							} else {
-								shouldSwap = sorted[y].String() > key.String()
-							}
-						}
-						if !shouldSwap { break }
-						sorted[y+1] = sorted[y]
-						y--
-					}
-					sorted[y+1] = key
-				}
-				return runtime.NewArray(sorted), nil
-			}), nil
-		case "is_empty":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				return runtime.NewBool(len(obj.Array) == 0), nil
-			}), nil
 		}
 	}
 	// String methods
@@ -1087,138 +955,6 @@ func (i *Interpreter) execMember(n *ast.MemberExpression, env *runtime.Environme
 		case "trim":
 			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
 				return runtime.NewString(strings.TrimSpace(obj.Str)), nil
-			}), nil
-		case "starts_with":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) == 0 {
-					return runtime.NewBool(false), nil
-				}
-				return runtime.NewBool(strings.HasPrefix(obj.Str, args[0].String())), nil
-			}), nil
-		case "ends_with":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) == 0 {
-					return runtime.NewBool(false), nil
-				}
-				return runtime.NewBool(strings.HasSuffix(obj.Str, args[0].String())), nil
-			}), nil
-		case "repeat_str":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) == 0 || args[0].Type != runtime.VAL_NUMBER {
-					return nil, fmt.Errorf("repeat_str() expects a number argument")
-				}
-				return runtime.NewString(strings.Repeat(obj.Str, int(args[0].Number))), nil
-			}), nil
-		case "reverse":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				runes := []rune(obj.Str)
-				for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {
-					runes[i], runes[j] = runes[j], runes[i]
-				}
-				return runtime.NewString(string(runes)), nil
-			}), nil
-		case "capitalize":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				runes := []rune(obj.Str)
-				if len(runes) == 0 {
-					return runtime.NewString(""), nil
-				}
-				return runtime.NewString(strings.ToUpper(string(runes[0])) + string(runes[1:])), nil
-			}), nil
-		case "count":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) == 0 {
-					return runtime.NewNumber(0, true), nil
-				}
-				return runtime.NewNumber(float64(strings.Count(obj.Str, args[0].String())), true), nil
-			}), nil
-		case "replace":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) < 2 {
-					return nil, fmt.Errorf("replace() expects 2 arguments (old, new)")
-				}
-				return runtime.NewString(strings.ReplaceAll(obj.Str, args[0].String(), args[1].String())), nil
-			}), nil
-		case "index_of":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) == 0 {
-					return runtime.NewNumber(-1, true), nil
-				}
-				idx := strings.Index(obj.Str, args[0].String())
-				return runtime.NewNumber(float64(idx), true), nil
-			}), nil
-		case "slice":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) < 1 || args[0].Type != runtime.VAL_NUMBER {
-					return nil, fmt.Errorf("slice() expects at least 1 number argument")
-				}
-				runes := []rune(obj.Str)
-				start := int(args[0].Number)
-				end := len(runes)
-				if len(args) >= 2 && args[1].Type == runtime.VAL_NUMBER {
-					end = int(args[1].Number)
-				}
-				if start < 0 { start = len(runes) + start }
-				if end < 0 { end = len(runes) + end }
-				if start < 0 { start = 0 }
-				if end > len(runes) { end = len(runes) }
-				if start >= end {
-					return runtime.NewString(""), nil
-				}
-				return runtime.NewString(string(runes[start:end])), nil
-			}), nil
-		case "chars":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				runes := []rune(obj.Str)
-				arr := make([]*runtime.Value, len(runes))
-				for idx, r := range runes {
-					arr[idx] = runtime.NewString(string(r))
-				}
-				return runtime.NewArray(arr), nil
-			}), nil
-		case "is_empty":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				return runtime.NewBool(obj.Str == ""), nil
-			}), nil
-		case "pad_start":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) < 1 || args[0].Type != runtime.VAL_NUMBER {
-					return nil, fmt.Errorf("pad_start() expects a number argument")
-				}
-				targetLen := int(args[0].Number)
-				padChar := " "
-				if len(args) >= 2 && args[1].Type == runtime.VAL_STRING {
-					padChar = args[1].Str
-				}
-				runes := []rune(obj.Str)
-				if len(runes) >= targetLen {
-					return runtime.NewString(obj.Str), nil
-				}
-				padRunes := []rune(padChar)
-				for len(runes) < targetLen {
-					runes = append(padRunes, runes...)
-				}
-				return runtime.NewString(string(runes[len(runes)-targetLen:])), nil
-			}), nil
-		case "pad_end":
-			return runtime.NewBuiltin(func(args []*runtime.Value) (*runtime.Value, error) {
-				if len(args) < 1 || args[0].Type != runtime.VAL_NUMBER {
-					return nil, fmt.Errorf("pad_end() expects a number argument")
-				}
-				targetLen := int(args[0].Number)
-				padChar := " "
-				if len(args) >= 2 && args[1].Type == runtime.VAL_STRING {
-					padChar = args[1].Str
-				}
-				runes := []rune(obj.Str)
-				if len(runes) >= targetLen {
-					return runtime.NewString(obj.Str), nil
-				}
-				padRunes := []rune(padChar)
-				for len(runes) < targetLen {
-					runes = append(runes, padRunes...)
-				}
-				return runtime.NewString(string(runes[:targetLen])), nil
 			}), nil
 		}
 	}
@@ -1281,72 +1017,3 @@ func (i *Interpreter) invokeCallback(callback *runtime.Value, args []*runtime.Va
 		return nil, fmt.Errorf("Runtime Error:\nCallback must be a function, got %s\nLine %d", callback.TypeName(), line)
 	}
 }
-
-// cloneEnv creates a shallow copy of an environment chain (safe for goroutine use).
-func cloneEnv(env *runtime.Environment) *runtime.Environment {
-	if env == nil {
-		return nil
-	}
-	newEnv := runtime.NewEnvironment(cloneEnv(env.Parent()))
-	for _, name := range env.Names() {
-		val, _ := env.GetLocal(name)
-		newEnv.Set(name, val)
-	}
-	return newEnv
-}
-
-// execSpawn evaluates: spawn <expr>
-// Launches the expression in a goroutine and returns a Future immediately.
-func (i *Interpreter) execSpawn(n *ast.SpawnExpression, env *runtime.Environment) (*runtime.Value, error) {
-	futureVal, future := runtime.NewFuture()
-
-	// Snapshot the environment so the goroutine has its own copy
-	envSnapshot := cloneEnv(env)
-
-	// If the expression is a call to an anonymous function with no args,
-	// e.g. spawn fn() { ... }, we handle it cleanly
-	go func() {
-		result, err := i.exec(n.Value, envSnapshot)
-		if err != nil {
-			future.Resolve(nil, err)
-			return
-		}
-		// If the result is a function (spawn fn() { ... }), call it
-		if result.Type == runtime.VAL_FUNCTION {
-			res, callErr := i.callFunction(result.Func, []*runtime.Value{}, n.Line)
-			if callErr != nil {
-				future.Resolve(nil, callErr)
-				return
-			}
-			result = res
-		}
-		// Unwrap return wrappers
-		result = result.Unwrap()
-		future.Resolve(result, nil)
-	}()
-
-	return futureVal, nil
-}
-
-// execAwait evaluates: await <expr>
-// Blocks until the Future is resolved and returns the result.
-func (i *Interpreter) execAwait(n *ast.AwaitExpression, env *runtime.Environment) (*runtime.Value, error) {
-	val, err := i.exec(n.Value, env)
-	if err != nil {
-		return nil, err
-	}
-
-	if val.Type != runtime.VAL_FUTURE {
-		return nil, fmt.Errorf("Runtime Error:\nawait expects a future (from spawn), got %s\nLine %d", val.TypeName(), n.Line)
-	}
-
-	result, awaitErr := val.Future.Await()
-	if awaitErr != nil {
-		return nil, fmt.Errorf("Runtime Error (in spawned task):\n%s\nLine %d", awaitErr, n.Line)
-	}
-
-	return result, nil
-}
-
-// Suppress unused import warning for sync
-var _ = sync.Once{}
